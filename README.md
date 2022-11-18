@@ -43,7 +43,7 @@ configured on your computer.
 
 ### Download
 
-You can [TODO-download](https://nordeck.atlassian.net/browse/NEW-487) the latest installable version of our
+You can [download](https://github.com/nordeck/feedback-application/) the latest installable version of our
 feedback-application.
 
 ### Configuration
