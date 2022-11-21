@@ -7,21 +7,6 @@
 </h1>
 <h4 align="center">A feedback tool for <a href="https://jitsi.org/" target="_blank">Jitsi</a>.</h4>
 
-<div align="center">
-
-• [Key Features](#Key Features)
-• [How To Use](#How To Use)
-• [Download](#Download)
-• [Configuration](#Configuration)
-• [Grafana](#Grafana)
-• [Development](#Deployment)
-• [Credits](#Credits)
-• [How to Contribute](#How to Contribute)
-• [Related](#Related) 
-• [You may also like...](#You may also like...) 
-• [License](#License) •
-
-</div>
 
 ### Key Features
 
