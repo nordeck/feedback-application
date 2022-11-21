@@ -7,21 +7,6 @@
 </h1>
 <h4 align="center">A feedback tool for <a href="https://jitsi.org/" target="_blank">Jitsi</a>.</h4>
 
-<div align="center">
-
-• [Key Features](#Key Features)
-• [How To Use](#How To Use)
-• [Download](#Download)
-• [Configuration](#Configuration)
-• [Grafana](#Grafana)
-• [Development](#Deployment)
-• [Credits](#Credits)
-• [How to Contribute](#How to Contribute)
-• [Related](#Related) 
-• [You may also like...](#You may also like...) 
-• [License](#License) •
-
-</div>
 
 ### Key Features
 
@@ -43,7 +28,7 @@ configured on your computer.
 
 ### Download
 
-You can [TODO-download](https://nordeck.atlassian.net/browse/NEW-487) the latest installable version of our
+You can [download](https://github.com/nordeck/feedback-application/) the latest installable version of our
 feedback-application.
 
 ### Configuration
@@ -94,7 +79,6 @@ This software uses the following open source packages:
 
 Please take a look at our [Contribution Guidelines](https://github.com/nordeck/.github/blob/main/docs/CONTRIBUTING.md).
 
-
 ### Related
 
 [Jitsi Conference Mapper](https://github.com/nordeck/Jitsi-Conference-Mapper) - Jitsi Conference Mapper
@@ -108,7 +92,7 @@ for [Matrix](https://matrix.org/)
 
 ### License
 
-- [Apache 2.0](TODO GITHUB LINK ZUR LICENSE)
+This project is licensed under [APACHE 2.0](./LICENSE).
 
 ### Sponsors
 
