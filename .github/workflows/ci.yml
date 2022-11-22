@@ -7,9 +7,11 @@ on:
   pull_request:
 
 jobs:
-  test:
+  test-backend:
     runs-on: ubuntu-latest
-
+    defaults:
+      run:
+        working-directory: backend
     steps:
       - name: Setup Go environment
         uses: actions/setup-go@v3.3.1
