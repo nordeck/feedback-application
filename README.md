@@ -5,75 +5,28 @@
   Feedback-Application
   <br>
 </h1>
-<h4 align="center">A feedback tool for <a href="https://jitsi.org/" target="_blank">Jitsi</a>.</h4>
+<h4 align="center">A feedback tool for <a href="https://jitsi.org/jitsi-meet/" target="_blank">Jitsi Meet</a>.</h4>
 
 
 ### Key Features
 
-This application is meant to run in parallel with a jitsi instance to manage, view and persist feedback rating data.
-The data is gathered from jitsi's internal feedback dialogue and persisted into its own postgres database. One is able
-to
-visualize the data with grafana.
+This application is meant to run in conjunction with [Jitsi Meet](https://jitsi.org/jitsi-meet/) embedded as an [Element](https://element.io/) widget to manage, view and persist feedback rating data.
+The Jitsi instance must be hosted in the context of Element/[Matrix](https://matrix.org), as this application performs authentication/authorization checks against the [Matrix UVS](https://github.com/matrix-org/matrix-user-verification-service/) component.
+The data is gathered from Jitsi's internal feedback dialogue and persisted into its own postgres database.
+One is able to visualize the data with grafana.
 
 ### How To Use
 
-To clone and run this application, you'll need [Git](https://git-scm.com) as well as [Docker](https://docker.com/)
-installed and
-configured on your computer. 
+This feedback application is made up of several components you need to install and configure.
+You can find documentation on how to install, configure, and use each one in their respective folders.
 
-1. Clone the repository
-2. Create and run a postgres database
-3. build and run the feedback-app image
-4. run grafana (optional)
+1. [jitsi-feedback-plugin](./jitsi-feedback-plugin/) implements the frontend in form of a Jitsi Meet plugin
+2. [backend](./backend/) is a REST service which verifies authorization and writes data to a database
+3. [Grafana](https://grafana.com/) can be used to visualise the data using the provided [dashboard](./grafana/)
 
-### Download
+## Download
 
-You can [download](https://github.com/nordeck/feedback-application/) the latest installable version of our
-feedback-application.
-
-### Configuration
-
-In order to run this application, you need to prepare your environment. You will need to set the following variables.
-<div style="margin-left: auto;
-            margin-right: auto;
-            width: 70%">
-
-| Environment variable name | Description                 | Example        |
-|---------------------------|-----------------------------|----------------|
-| DB_HOST                   | DB server's hostname        | localhost      |
-| DB_PORT                   | DB server's port            | 5432           |
-| DB_USER                   | DB server's username        | someUser       |
-| DB_PASSWORD               | DB user's password          | somePassphrase |
-| DB_NAME                   | Database name               | someDatabase   |
-| SSL_MODE                  | Use SSL (enable or disable) | disable        |
-
-</div>
-
-### Grafana
-
-To visualize the feedback data, we created a simple dashboard for grafana. You can import it from
-/feedback-application/grafana/
-and customize it to your needs.
-
-You will need to configure your datasource beforehand. Use your grepped IP and your prepared database configuration.
-
-### Development
-
-The database is versioned using the goose plugin for go.
-
-### Credits
-
-This software uses the following open source packages:
-
-- [github.com/dariubs/gorm-jsonb](https://github.com/dariubs/gorm-jsonb) v0.1.5
-- [github.com/gorilla/mux](https://github.com/gorilla/mux) v1.8.0
-- [github.com/lib/pq](https://github.com/lib/pq) v1.10.7
-- [github.com/pressly/goose/v3](https://github.com/pressly/goose/v3) v3.7.0
-- [github.com/stretchr/testify](https://github.com/stretchr/testify) v1.8.1
-- [github.com/testcontainers/testcontainers-go](https://github.com/estcontainers/testcontainers-go) v0.15.0
-- [go.uber.org/zap](https://pkg.go.dev/go.uber.org/zap) v1.23.0
-- [gorm.io/driver/postgres](https://pkg.go.dev/gorm.io/driver/postgres) v1.4.5
-- [gorm.io/gorm](https://pkg.go.dev/gorm.io/gorm) v1.24.1-0.20221019064659-5dd2bb482755
+You can download the latest version of our feedback-application from this Github repo (https://github.com/nordeck/feedback-application).
 
 ### How to Contribute
 
