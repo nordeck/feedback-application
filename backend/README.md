@@ -4,11 +4,14 @@
 
 This application implements the backend component of the feedback-application.
 It provides a REST API on which feedback may be submitted.
-An authorization mechanism is implemented in conjunction with the frontend, which ensures that feedback can only be submitted by authorized [Matrix](https://matrix.org) users through [Matrix UVS](https://github.com/matrix-org/matrix-user-verification-service/).
+An authorization mechanism is implemented in conjunction with the frontend, which ensures that feedback can only be
+submitted by authorized [Matrix](https://matrix.org) users
+through [Matrix UVS](https://github.com/matrix-org/matrix-user-verification-service/).
 
 ## How To Use
 
-To clone and run this application, you'll need [Git](https://git-scm.com) as well as [Docker](https://docker.com/) installed and configured on your computer. 
+To clone and run this application, you'll need [Git](https://git-scm.com) as well as [Docker](https://docker.com/)
+installed and configured on your computer.
 
 1. Clone this repository
 2. Create and run a postgres database

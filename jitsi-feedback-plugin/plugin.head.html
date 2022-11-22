@@ -37,7 +37,7 @@
         // overriding sendFeedback achieves 2 of our goals:
         // 1. it lets us inject code in the right place (feedback submission)
         // 2. it disables sending feedback to other backends, primarily callstats.io
-        conference.statistics.sendFeedback = async function(score, details) {
+        conference.statistics.sendFeedback = async function (score, details) {
             console.log('Feedback', score, details);
             // TODO: collect metrics & metadata (see list etc)
             // TODO: submit to backend

@@ -10,8 +10,11 @@
 
 ### Key Features
 
-This application is meant to run in conjunction with [Jitsi Meet](https://jitsi.org/jitsi-meet/) embedded as an [Element](https://element.io/) widget to manage, view and persist feedback rating data.
-The Jitsi instance must be hosted in the context of Element/[Matrix](https://matrix.org), as this application performs authentication/authorization checks against the [Matrix UVS](https://github.com/matrix-org/matrix-user-verification-service/) component.
+This application is meant to run in conjunction with [Jitsi Meet](https://jitsi.org/jitsi-meet/) embedded as
+an [Element](https://element.io/) widget to manage, view and persist feedback rating data.
+The Jitsi instance must be hosted in the context of Element/[Matrix](https://matrix.org), as this application performs
+authentication/authorization checks against
+the [Matrix UVS](https://github.com/matrix-org/matrix-user-verification-service/) component.
 The data is gathered from Jitsi's internal feedback dialogue and persisted into its own postgres database.
 One is able to visualize the data with grafana.
 
@@ -26,7 +29,8 @@ You can find documentation on how to install, configure, and use each one in the
 
 ## Download
 
-You can download the latest version of our feedback-application from this Github repo (https://github.com/nordeck/feedback-application).
+You can download the latest version of our feedback-application from this Github
+repo (https://github.com/nordeck/feedback-application).
 
 ### How to Contribute
 
