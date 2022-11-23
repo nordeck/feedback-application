@@ -45,10 +45,11 @@ file.
             margin-right: auto;
             width: 70%">
 
-| Setting name                | Description                                                                      | Example     |
-|-----------------------------|----------------------------------------------------------------------------------|-------------|
-| `config.feedbackPercentage` | percentage of users to automatically request feedback from when leaving the call | `100`       |
-| `config.callStatsID`        | optional: enable button in toolbar                                               | `'enabled'` |
-| `config.metadata.???`       | optional: configure what metadata should be gathered                             | ``          |
+| Setting name                | Description                                                                      | Example           |
+|-----------------------------|----------------------------------------------------------------------------------|-------------------|
+| `config.feedbackPercentage` | percentage of users to automatically request feedback from when leaving the call | `100`             |
+| `config.feedbackBackend`    | address where the backend's REST API is available                                | `http://backend/` |
+| `config.callStatsID`        | optional: enable button in toolbar                                               | `'enabled'`       |
+| `config.metadata.???`       | optional: configure what metadata should be gathered                             | ``                |
 
 </div>
