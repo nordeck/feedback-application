@@ -26,7 +26,7 @@ You can find documentation on how to install, configure, and use each one in the
 2. [backend](./backend/) is a REST service which verifies authorization and writes data to a database
 3. [Grafana](https://grafana.com/) can be used to visualise the data using the provided [dashboard](./grafana/)
 
-## Download
+### Download
 
 You can download the latest version of our feedback-application from this Github
 repo (https://github.com/nordeck/feedback-application).
