@@ -15,6 +15,9 @@
  *
  */
 
+// address of the feedback backend REST API
+config.feedbackBackend = 'http://backend'
+
 // percentage of users to automatically request feedback from when leaving the call
 config.feedbackPercentage = 100;
 
