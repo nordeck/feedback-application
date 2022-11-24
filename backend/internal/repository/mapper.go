@@ -21,7 +21,7 @@ import (
 	"feedback/internal/api"
 )
 
-func MapToModel(feedback api.Feedback) *Feedback {
+func MapToFeedbackModel(feedback api.Feedback) *Feedback {
 	var dbFeedback Feedback
 	dbFeedback.RatingComment = feedback.RatingComment
 	dbFeedback.Rating = feedback.Rating
@@ -32,4 +32,11 @@ func MapToModel(feedback api.Feedback) *Feedback {
 	}
 
 	return &dbFeedback
+}
+
+func MapToTokenModel(tokenRequest api.TokenRequest) *Token {
+	var dbToken Token
+	dbToken.OidcToken = tokenRequest.OidcToken
+
+	return &dbToken
 }

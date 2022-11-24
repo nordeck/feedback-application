@@ -28,6 +28,7 @@ import (
 )
 
 const (
+	TOKEN_PATH    = "/token"
 	FEEDBACK_PATH = "/feedback"
 )
 
@@ -43,9 +44,34 @@ func New(repo repository.Interface) *Controller {
 
 func (c *Controller) GetRouter() http.Handler {
 	router := mux.NewRouter().StrictSlash(true)
+	router.HandleFunc(TOKEN_PATH, c.createToken).Methods(http.MethodPost)
 	router.HandleFunc(FEEDBACK_PATH, c.createFeedback).Methods(http.MethodPost)
 
 	return router
+}
+
+func (c *Controller) createToken(writer http.ResponseWriter, request *http.Request) {
+	body, err := io.ReadAll(request.Body)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var tokenRequest api.TokenRequest
+	err = json.Unmarshal(body, &tokenRequest)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusBadRequest)
+		log.Debug(err)
+		return
+	}
+
+	err = c.repo.Store(repository.MapToTokenModel(tokenRequest))
+
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
+		log.Debug(err)
+		return
+	}
 }
 
 func (c *Controller) createFeedback(writer http.ResponseWriter, request *http.Request) {
@@ -62,7 +88,7 @@ func (c *Controller) createFeedback(writer http.ResponseWriter, request *http.Re
 		return
 	}
 
-	err = c.repo.Store(repository.MapToModel(feedback))
+	err = c.repo.Store(repository.MapToFeedbackModel(feedback))
 
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusInternalServerError)

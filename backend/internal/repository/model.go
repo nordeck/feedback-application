@@ -33,3 +33,8 @@ type Feedback struct {
 	RatingComment string
 	Metadata      gormjsonb.JSONB
 }
+
+type Token struct {
+	BaseModel
+	OidcToken string
+}

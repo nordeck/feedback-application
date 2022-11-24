@@ -43,6 +43,60 @@ func (m *RepositoryMock) Store(value interface{}) error {
 
 }
 
+func TestController_CreateToken(t *testing.T) {
+	tokenValue := "{\n  \"acr\": \"1\",\n  \"aid\": \"default\",\n  \"amr\": [\n    \"pwd\"\n  ],\n  \"aud\": \"default-demo\",\n  \"auth_time\": 1631696786,\n  \"email\": \"\",\n  \"email_verified\": false,\n  \"exp\": 1631700395,\n  \"iat\": 1631696795,\n  \"idp\": \"default\",\n  \"iss\": \"https://cloudentity-user.authz.cloudentity.io/cloudentity-user/default\",\n  \"jti\": \"261e658f-b40a-42f5-9e98-3eb022dfccac\",\n  \"name\": \"John Doe\",\n  \"nbf\": 1631696795,\n  \"nonce\": \"c50rf23o825ulrjk38qg\",\n  \"rat\": 1631696795,\n  \"scp\": [\n    \"email\",\n    \"openid\",\n    \"profile\"\n  ],\n  \"st\": \"public\",\n  \"sub\": \"user\",\n  \"tid\": \"cloudentity-user\"\n}"
+
+	repoMock := new(RepositoryMock)
+	expected := &repository.Token{
+		OidcToken: tokenValue,
+	}
+	repoMock.On("Store", expected).Return(nil)
+	controller := New(repoMock)
+
+	requestBody, _ := json.Marshal(&api.TokenRequest{
+		OidcToken: tokenValue,
+	})
+	request := httptest.NewRequest(http.MethodPost, "/token", bytes.NewReader(requestBody))
+	responseWriter := httptest.NewRecorder()
+
+	controller.GetRouter().ServeHTTP(responseWriter, request)
+	assert.Equal(t, 200, responseWriter.Result().StatusCode)
+	repoMock.AssertExpectations(t)
+}
+
+func TestController_CreateToken_invalidJson(t *testing.T) {
+	repoMock := new(RepositoryMock)
+	controller := New(repoMock)
+
+	request := httptest.NewRequest(http.MethodPost, "/token", strings.NewReader(""))
+	responseWriter := httptest.NewRecorder()
+
+	controller.GetRouter().ServeHTTP(responseWriter, request)
+
+	status := responseWriter.Result().StatusCode
+	assert.Equal(t, 400, status)
+	repoMock.AssertNotCalled(t, "Store", mock.Anything)
+}
+
+func TestController_CreateToken_databaseError(t *testing.T) {
+	tokenValue := "{\n  \"acr\": \"1\",\n  \"aid\": \"default\",\n  \"amr\": [\n    \"pwd\"\n  ],\n  \"aud\": \"default-demo\",\n  \"auth_time\": 1631696786,\n  \"email\": \"\",\n  \"email_verified\": false,\n  \"exp\": 1631700395,\n  \"iat\": 1631696795,\n  \"idp\": \"default\",\n  \"iss\": \"https://cloudentity-user.authz.cloudentity.io/cloudentity-user/default\",\n  \"jti\": \"261e658f-b40a-42f5-9e98-3eb022dfccac\",\n  \"name\": \"John Doe\",\n  \"nbf\": 1631696795,\n  \"nonce\": \"c50rf23o825ulrjk38qg\",\n  \"rat\": 1631696795,\n  \"scp\": [\n    \"email\",\n    \"openid\",\n    \"profile\"\n  ],\n  \"st\": \"public\",\n  \"sub\": \"user\",\n  \"tid\": \"cloudentity-user\"\n}"
+
+	repoMock := new(RepositoryMock)
+	repoMock.On("Store", mock.Anything).Return(errors.New("error"))
+
+	controller := New(repoMock)
+	requestBody, _ := json.Marshal(&repository.Token{
+		OidcToken: tokenValue,
+	})
+	request := httptest.NewRequest(http.MethodPost, "/token", bytes.NewReader(requestBody))
+	responseWriter := httptest.NewRecorder()
+
+	controller.GetRouter().ServeHTTP(responseWriter, request)
+
+	status := responseWriter.Result().StatusCode
+	assert.Equal(t, 500, status)
+}
+
 func TestController_CreateFeedback(t *testing.T) {
 	ratingComment := "any_comment"
 	rating := 3

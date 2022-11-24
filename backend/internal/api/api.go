@@ -17,6 +17,10 @@
 
 package api
 
+type TokenRequest struct {
+	OidcToken string
+}
+
 type Feedback struct {
 	Rating        int
 	RatingComment string
