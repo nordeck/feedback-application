@@ -55,6 +55,12 @@ func (c *Controller) GetRouter() http.Handler {
 
 func (c *Controller) createToken(writer http.ResponseWriter, request *http.Request) {
 	authHeadVal := request.Header.Get("authorization")
+	if authHeadVal == "" {
+		err := "authentication header is empty!"
+		http.Error(writer, err, http.StatusInternalServerError)
+		log.Debug(err)
+		return
+	}
 	dummyJwt, err := generateDummyJwt(authHeadVal)
 
 	if err != nil {
