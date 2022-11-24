@@ -22,9 +22,12 @@ import (
 	"feedback/internal/api"
 	"feedback/internal/logger"
 	"feedback/internal/repository"
+	"github.com/golang-jwt/jwt"
 	"github.com/gorilla/mux"
 	"io"
 	"net/http"
+	"strings"
+	"time"
 )
 
 const (
@@ -44,28 +47,23 @@ func New(repo repository.Interface) *Controller {
 
 func (c *Controller) GetRouter() http.Handler {
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc(TOKEN_PATH, c.createToken).Methods(http.MethodPost)
+	router.HandleFunc(TOKEN_PATH, c.createToken).Methods(http.MethodGet)
 	router.HandleFunc(FEEDBACK_PATH, c.createFeedback).Methods(http.MethodPost)
 
 	return router
 }
 
 func (c *Controller) createToken(writer http.ResponseWriter, request *http.Request) {
-	body, err := io.ReadAll(request.Body)
-	if err != nil {
-		http.Error(writer, err.Error(), http.StatusBadRequest)
-		return
-	}
+	authHeadVal := request.Header.Get("authorization")
+	dummyJwt, err := generateDummyJwt(authHeadVal)
 
-	var tokenRequest api.TokenRequest
-	err = json.Unmarshal(body, &tokenRequest)
 	if err != nil {
-		http.Error(writer, err.Error(), http.StatusBadRequest)
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
 		log.Debug(err)
 		return
 	}
 
-	err = c.repo.Store(repository.MapToTokenModel(tokenRequest))
+	err = json.NewEncoder(writer).Encode(dummyJwt)
 
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
@@ -95,4 +93,16 @@ func (c *Controller) createFeedback(writer http.ResponseWriter, request *http.Re
 		log.Debug(err)
 		return
 	}
+}
+
+func generateDummyJwt(oidcToken string) (string, error) {
+	var hmacSampleSecret = []byte("SomeSampleSecret")
+	trimmedHeaderValue := strings.Trim(oidcToken, "Bearer")
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"oidcToken": trimmedHeaderValue,
+		"nbf":       time.Date(1970, 01, 01, 0, 0, 0, 0, time.UTC).Unix(),
+	})
+
+	tokenString, err := token.SignedString(hmacSampleSecret)
+	return tokenString, err
 }

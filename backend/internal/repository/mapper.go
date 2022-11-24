@@ -33,10 +33,3 @@ func MapToFeedbackModel(feedback api.Feedback) *Feedback {
 
 	return &dbFeedback
 }
-
-func MapToTokenModel(tokenRequest api.TokenRequest) *Token {
-	var dbToken Token
-	dbToken.OidcToken = tokenRequest.OidcToken
-
-	return &dbToken
-}
