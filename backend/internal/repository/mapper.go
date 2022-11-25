@@ -21,7 +21,7 @@ import (
 	"feedback/internal/api"
 )
 
-func MapToModel(feedback api.Feedback) *Feedback {
+func MapToFeedbackModel(feedback api.Feedback) *Feedback {
 	var dbFeedback Feedback
 	dbFeedback.RatingComment = feedback.RatingComment
 	dbFeedback.Rating = feedback.Rating
