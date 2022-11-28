@@ -59,7 +59,7 @@ jobs:
             org.opencontainers.image.vendor=Nordeck IT + Consulting GmbH
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
-            type=ref,event=branch,enable=true
+            type=ref,event=pr,enable=true
             type=ref,enable=true,priority=600,prefix=,suffix=,event=tag
 
       - name: Docker build and push
