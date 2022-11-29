@@ -1,0 +1,152 @@
+# Default values for feedback-backend.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/nordeck/feedback-backend
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: pr-9
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  className: ""
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: localhost
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #  - secretName: chart-example-tls
+  #    hosts:
+  #      - chart-example.local
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 1
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# passed to the feedback-application backend
+db:
+  host: feedback-backend
+  port: "5432"
+  user: feedback-user
+  password: "12345"
+  name: feedback
+  ssl: false
+
+# passed to postgres
+database:
+  auth:
+    username: feedback-user
+    password: "12345"
+    database: feedback
+    postgresPassword: "54321"
+  containerPorts.postgresql: "5432"
+  tls:
+    enabled: false
+
+# passed to grafana
+grafana:
+  datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+        # <string, required> name of the datasource. Required
+      - name: Feedback-psql
+        # <string, required> datasource type. Required
+        type: postgres
+        # <string, required> access mode. proxy or direct (Server or Browser in the UI). Required
+        access: proxy
+        # <int> org id. will default to orgId 1 if not specified
+        orgId: 1
+        # <string> url
+        url: "http://feedback-backend:5432"
+        # <string> database password, if used
+        password: "12345"
+        # <string> database user, if used
+        user: feedback-user
+        # <string> database name, if used
+        database: feedback
+        # <bool> enable/disable basic auth
+        # basicAuth:
+        # <string> basic auth username
+        # basicAuthUser:
+        # <string> basic auth password
+        # basicAuthPassword:
+        # <bool> enable/disable with credentials headers
+        # withCredentials:
+        # <bool> mark as default datasource. Max one per org
+        # isDefault:
+        # <map> fields that will be converted to json and stored in json_data
+        # jsonData:
+        #   graphiteVersion: "1.1"
+        #   tlsAuth: true
+        #   tlsAuthWithCACert: true
+        # <string> json object of data that will be encrypted.
+        # secureJsonData:
+        #   tlsCACert: "..."
+        #   tlsClientCert: "..."
+        #   tlsClientKey: "..."
+        version: 1
+        # <bool> allow users to edit datasources from the UI.
+        editable: false
+  dashboards:
+    default:
+      feedback-dashboard:
+        url: https://github.com/nordeck/feedback-application/blob/main/grafana/Feedback%20Dashboard-1667925476068.json
