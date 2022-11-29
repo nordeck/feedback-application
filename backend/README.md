@@ -30,14 +30,16 @@ You will need to set the following variables.
             margin-right: auto;
             width: 70%">
 
-| Environment variable name | Description                 | Example        |
-|---------------------------|-----------------------------|----------------|
-| DB_HOST                   | DB server's hostname        | localhost      |
-| DB_PORT                   | DB server's port            | 5432           |
-| DB_USER                   | DB server's username        | someUser       |
-| DB_PASSWORD               | DB user's password          | somePassphrase |
-| DB_NAME                   | Database name               | someDatabase   |
-| SSL_MODE                  | Use SSL (enable or disable) | disable        |
+| Environment variable name | Description                                                   | Example                      |
+|---------------------------|---------------------------------------------------------------|------------------------------|
+| DB_HOST                   | DB server's hostname                                          | localhost                    |
+| DB_PORT                   | DB server's port                                              | 5432                         |
+| DB_USER                   | DB server's username                                          | someUser                     |
+| DB_PASSWORD               | DB user's password                                            | somePassphrase               |
+| DB_NAME                   | Database name                                                 | someDatabase                 |
+| SSL_MODE                  | Use SSL (enable or disable)                                   | disable                      |
+| OIDC_VALIDATION_URL       | the URL of the MVS the OIDC Token has to be validated against | https://some.url/verify/user |
+| JWT_SIGNATURE             | Some unique String the JWT will get signed with               | someArbitraryString          |
 
 </div>
 

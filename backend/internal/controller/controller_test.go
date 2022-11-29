@@ -38,37 +38,22 @@ type RepositoryMock struct {
 }
 
 func (m *RepositoryMock) Store(value interface{}) error {
+	// mock
 	args := m.Called(value)
 	return args.Error(0)
 
 }
 
-func TestController_GetToken(t *testing.T) {
-	repoMock := new(RepositoryMock)
-	controller := New(repoMock)
-	request := httptest.NewRequest(http.MethodGet, "/token", nil)
-	request.Header.Set("authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJpbmNvbWluZyIsIm5hbWUiOiJKb2huIERvZSIsImlhdCI6MTUxNjIzOTAyMn0.0DoNIGqCNa1Tc41par4bzqnQWwlgsKCIP2mgUYEHemM")
-	responseWriter := httptest.NewRecorder()
-
-	controller.GetRouter().ServeHTTP(responseWriter, request)
-
-	assert.Equal(t, 200, responseWriter.Result().StatusCode)
-	actual := responseWriter.Body.String()
-	expected := "\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYmYiOjAsIm9pZGNUb2tlbiI6IiBleUpoYkdjaU9pSklVekkxTmlJc0luUjVjQ0k2SWtwWFZDSjkuZXlKemRXSWlPaUpwYm1OdmJXbHVaeUlzSW01aGJXVWlPaUpLYjJodUlFUnZaU0lzSW1saGRDSTZNVFV4TmpJek9UQXlNbjAuMERvTklHcUNOYTFUYzQxcGFyNGJ6cW5RV3dsZ3NLQ0lQMm1nVVlFSGVtTSJ9.udPK9mYoV5e2MnLMwerK6j55841eimKCdf1imGVYMxg\"\n"
-	assert.Equal(t, expected, actual, "not the same")
-	repoMock.AssertExpectations(t)
-}
-
 func TestController_GetToken_emptyHeader(t *testing.T) {
 	repoMock := new(RepositoryMock)
-	controller := New(repoMock)
+	controller := New(repoMock, nil)
 	request := httptest.NewRequest(http.MethodGet, "/token", nil)
 	responseWriter := httptest.NewRecorder()
 
 	controller.GetRouter().ServeHTTP(responseWriter, request)
 
 	status := responseWriter.Result().StatusCode
-	assert.Equal(t, 500, status)
+	assert.Equal(t, 400, status)
 }
 
 func TestController_CreateFeedback(t *testing.T) {
@@ -82,7 +67,7 @@ func TestController_CreateFeedback(t *testing.T) {
 		Metadata:      gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"},
 	}
 	repoMock.On("Store", expected).Return(nil)
-	controller := New(repoMock)
+	controller := New(repoMock, nil)
 
 	metadata := map[string]interface{}{
 		"first_key":  "first_value",
@@ -104,7 +89,7 @@ func TestController_CreateFeedback(t *testing.T) {
 
 func TestController_CreateFeedback_emptyBody(t *testing.T) {
 	repoMock := new(RepositoryMock)
-	controller := New(repoMock)
+	controller := New(repoMock, nil)
 
 	request := httptest.NewRequest(http.MethodPost, "/feedback", iotest.ErrReader(errors.New("error")))
 	responseWriter := httptest.NewRecorder()
@@ -118,7 +103,7 @@ func TestController_CreateFeedback_emptyBody(t *testing.T) {
 
 func TestController_CreateFeedback_invalidJson(t *testing.T) {
 	repoMock := new(RepositoryMock)
-	controller := New(repoMock)
+	controller := New(repoMock, nil)
 
 	request := httptest.NewRequest(http.MethodPost, "/feedback", strings.NewReader("broken"))
 	responseWriter := httptest.NewRecorder()
@@ -134,7 +119,7 @@ func TestController_CreateFeedback_databaseError(t *testing.T) {
 	repoMock := new(RepositoryMock)
 	repoMock.On("Store", mock.Anything).Return(errors.New("error"))
 
-	controller := New(repoMock)
+	controller := New(repoMock, nil)
 	requestBody, _ := json.Marshal(&repository.Feedback{
 		Rating:        1,
 		RatingComment: "any",

@@ -19,57 +19,57 @@ package controller
 
 import (
 	"encoding/json"
+	"feedback/internal"
 	"feedback/internal/api"
+	"feedback/internal/auth"
 	"feedback/internal/logger"
 	"feedback/internal/repository"
-	"github.com/golang-jwt/jwt"
 	"github.com/gorilla/mux"
 	"io"
 	"net/http"
-	"strings"
-	"time"
 )
 
 const (
-	TOKEN_PATH    = "/token"
-	FEEDBACK_PATH = "/feedback"
+	TokenPath    = "/token"
+	FeedbackPath = "/feedback"
 )
 
 var log = logger.Instance()
 
 type Controller struct {
 	repo repository.Interface
+	serv *auth.OidcAuthentication
 }
 
-func New(repo repository.Interface) *Controller {
-	return &Controller{repo}
+func New(repo repository.Interface, serv *auth.OidcAuthentication) *Controller {
+	return &Controller{repo, serv}
 }
 
 func (c *Controller) GetRouter() http.Handler {
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc(TOKEN_PATH, c.createToken).Methods(http.MethodGet)
-	router.HandleFunc(FEEDBACK_PATH, c.createFeedback).Methods(http.MethodPost)
+	router.HandleFunc(TokenPath, c.createToken).Methods(http.MethodGet)
+	router.HandleFunc(FeedbackPath, c.createFeedback).Methods(http.MethodPost)
 
 	return router
 }
 
 func (c *Controller) createToken(writer http.ResponseWriter, request *http.Request) {
-	authHeadVal := request.Header.Get("authorization")
-	if authHeadVal == "" {
-		err := "authentication header is empty!"
-		http.Error(writer, err, http.StatusInternalServerError)
-		log.Debug(err)
-		return
-	}
-	dummyJwt, err := generateDummyJwt(authHeadVal)
+	tokenService := auth.New(internal.ConfigurationFromEnv())
+	authorizationHeader := request.Header.Get("authorization")
 
-	if err != nil {
-		http.Error(writer, err.Error(), http.StatusInternalServerError)
+	if len(authorizationHeader) == 0 {
+		err := "header value for key ('authorization') is not defined"
+		http.Error(writer, err, http.StatusBadRequest)
 		log.Debug(err)
 		return
 	}
 
-	err = json.NewEncoder(writer).Encode(dummyJwt)
+	token := tokenService.ExtractTokenFrom(authorizationHeader)
+	validationRequest, err := tokenService.CreateValidationRequestFrom(token)
+	validationResponse, err := tokenService.Validate(validationRequest)
+	mappedValidationResponse, err := tokenService.Map(validationResponse)
+	jwt, err := tokenService.Generate(mappedValidationResponse.UserId)
+	err = json.NewEncoder(writer).Encode(jwt)
 
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
@@ -99,16 +99,4 @@ func (c *Controller) createFeedback(writer http.ResponseWriter, request *http.Re
 		log.Debug(err)
 		return
 	}
-}
-
-func generateDummyJwt(oidcToken string) (string, error) {
-	var hmacSampleSecret = []byte("SomeSampleSecret")
-	trimmedHeaderValue := strings.Trim(oidcToken, "Bearer")
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"oidcToken": trimmedHeaderValue,
-		"nbf":       time.Date(1970, 01, 01, 0, 0, 0, 0, time.UTC).Unix(),
-	})
-
-	tokenString, err := token.SignedString(hmacSampleSecret)
-	return tokenString, err
 }
