@@ -11,5 +11,6 @@ func Post(url string, reqBody []byte) (io.ReadCloser, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	return resp.Body, err
 }

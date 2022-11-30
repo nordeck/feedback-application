@@ -101,7 +101,7 @@ func TestController_InvalidToken(t *testing.T) {
 
 	assert.Equal(t, 500, responseWriter.Result().StatusCode)
 	actual := responseWriter.Body.String()
-	assert.True(t, strings.Contains(actual, "token value is empty\n"), "not the same")
+	assert.True(t, strings.Contains(actual, "token value has not matched\n"), "not the same")
 	repoMock.AssertExpectations(t)
 }
 

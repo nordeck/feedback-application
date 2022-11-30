@@ -32,6 +32,7 @@ type Configuration struct {
 	Sslmode           string "disable" // SSL_MODE
 	OidcValidationUrl string // OIDC_VALIDATION_URL
 	JwtSignature      string // JWT_SIGNATURE
+	MatrixServerName  string // MATRIX_SERVER_NAME
 }
 
 func ConfigurationFromEnv() *Configuration {
@@ -44,6 +45,7 @@ func ConfigurationFromEnv() *Configuration {
 		os.Getenv("SSL_MODE"),
 		os.Getenv("OIDC_VALIDATION_URL"),
 		os.Getenv("JWT_SIGNATURE"),
+		os.Getenv("MATRIX_SERVER_NAME"),
 	}
 
 	elements := reflect.ValueOf(&config).Elem()
