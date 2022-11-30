@@ -24,6 +24,7 @@ import (
 	"feedback/internal/api"
 	"feedback/internal/repository"
 	gormjsonb "github.com/dariubs/gorm-jsonb"
+	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"net/http"
@@ -44,16 +45,64 @@ func (m *RepositoryMock) Store(value interface{}) error {
 
 }
 
-func TestController_GetToken_emptyHeader(t *testing.T) {
+func TestController_ValidTokenToJwt(t *testing.T) {
 	repoMock := new(RepositoryMock)
+
+	httpmock.Activate()
+	response := httpmock.NewStringResponder(200, "{\n  \"results\": {\n    \"user\": true\n  },\n  \"user_id\": \"@user:domain.tld\"\n}")
+	httpmock.RegisterResponder("POST", "https://some.url/verify/user", response)
+
 	controller := New(repoMock, nil)
 	request := httptest.NewRequest(http.MethodGet, "/token", nil)
+	request.Header.Set("authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJpbmNvbWluZyIsIm5hbWUiOiJKb2huIERvZSIsImlhdCI6MTUxNjIzOTAyMn0.0DoNIGqCNa1Tc41par4bzqnQWwlgsKCIP2mgUYEHemM")
 	responseWriter := httptest.NewRecorder()
 
 	controller.GetRouter().ServeHTTP(responseWriter, request)
 
-	status := responseWriter.Result().StatusCode
-	assert.Equal(t, 400, status)
+	assert.Equal(t, 200, responseWriter.Result().StatusCode)
+	actual := responseWriter.Body.String()
+	assert.True(t, strings.Contains(actual, "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."), "not the same")
+	repoMock.AssertExpectations(t)
+}
+
+func TestController_InvalidResponse(t *testing.T) {
+	repoMock := new(RepositoryMock)
+
+	httpmock.Activate()
+	response := httpmock.NewStringResponder(200, "{\n  \"results\": {\n    \"user\": false\n  },\n  \"user_id\": null\n}")
+	httpmock.RegisterResponder("POST", "https://some.url/verify/user", response)
+
+	controller := New(repoMock, nil)
+	request := httptest.NewRequest(http.MethodGet, "/token", nil)
+	request.Header.Set("authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJpbmNvbWluZyIsIm5hbWUiOiJKb2huIERvZSIsImlhdCI6MTUxNjIzOTAyMn0.0DoNIGqCNa1Tc41par4bzqnQWwlgsKCIP2mgUYEHemM")
+	responseWriter := httptest.NewRecorder()
+
+	controller.GetRouter().ServeHTTP(responseWriter, request)
+
+	assert.Equal(t, 200, responseWriter.Result().StatusCode)
+	actual := responseWriter.Body.String()
+	assert.True(t, strings.Contains(actual, "null"), "not the same")
+	repoMock.AssertExpectations(t)
+}
+
+func TestController_InvalidToken(t *testing.T) {
+	repoMock := new(RepositoryMock)
+
+	httpmock.Activate()
+	response := httpmock.NewStringResponder(200, "{\n  \"results\": {\n    \"user\": true\n  },\n  \"user_id\": \"@user:domain.tld\"\n}")
+	httpmock.RegisterResponder("POST", "https://some.url/verify/user", response)
+
+	controller := New(repoMock, nil)
+	request := httptest.NewRequest(http.MethodGet, "/token", nil)
+	request.Header.Set("authorization", "Bearer ")
+	responseWriter := httptest.NewRecorder()
+
+	controller.GetRouter().ServeHTTP(responseWriter, request)
+
+	assert.Equal(t, 500, responseWriter.Result().StatusCode)
+	actual := responseWriter.Body.String()
+	assert.True(t, strings.Contains(actual, "token value is empty\n"), "not the same")
+	repoMock.AssertExpectations(t)
 }
 
 func TestController_CreateFeedback(t *testing.T) {

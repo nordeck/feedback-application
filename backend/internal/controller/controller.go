@@ -54,26 +54,16 @@ func (c *Controller) GetRouter() http.Handler {
 }
 
 func (c *Controller) createToken(writer http.ResponseWriter, request *http.Request) {
-	tokenService := auth.New(internal.ConfigurationFromEnv())
-	authorizationHeader := request.Header.Get("authorization")
-
-	if len(authorizationHeader) == 0 {
-		err := "header value for key ('authorization') is not defined"
-		http.Error(writer, err, http.StatusBadRequest)
-		log.Debug(err)
+	jwt, err := auth.New(internal.ConfigurationFromEnv()).Validate(request)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
-	token := tokenService.ExtractTokenFrom(authorizationHeader)
-	validationRequest, err := tokenService.CreateValidationRequestFrom(token)
-	validationResponse, err := tokenService.Validate(validationRequest)
-	mappedValidationResponse, err := tokenService.Map(validationResponse)
-	jwt, err := tokenService.Generate(mappedValidationResponse.UserId)
 	err = json.NewEncoder(writer).Encode(jwt)
 
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
-		log.Debug(err)
 		return
 	}
 }
