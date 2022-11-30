@@ -6,9 +6,9 @@ replicaCount: 1
 
 image:
   repository: ghcr.io/nordeck/feedback-backend
-  pullPolicy: IfNotPresent
+  pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: pr-9
+  tag: latest
 
 imagePullSecrets: []
 nameOverride: ""
