@@ -83,20 +83,21 @@ affinity: {}
 
 # passed to the feedback-application backend
 db:
-  host: feedback-backend
+  host: feedback-backend-postgresql.dev
   port: "5432"
   user: feedback-user
   password: "12345"
   name: feedback
-  ssl: false
+  ssl: false # TODO: https://www.postgresql.org/docs/9.1/libpq-ssl.html
 
 # passed to postgres
-database:
+postgresql:
   auth:
     username: feedback-user
     password: "12345"
     database: feedback
-    postgresPassword: "54321"
+    enablePostgresUser: false
+    # postgresPassword: "54321"
   containerPorts.postgresql: "5432"
   tls:
     enabled: false
@@ -104,48 +105,35 @@ database:
 # passed to grafana
 grafana:
   datasources:
-  datasources.yaml:
-    apiVersion: 1
-    datasources:
-        # <string, required> name of the datasource. Required
-      - name: Feedback-psql
-        # <string, required> datasource type. Required
-        type: postgres
-        # <string, required> access mode. proxy or direct (Server or Browser in the UI). Required
-        access: proxy
-        # <int> org id. will default to orgId 1 if not specified
-        orgId: 1
-        # <string> url
-        url: "http://feedback-backend:5432"
-        # <string> database password, if used
-        password: "12345"
-        # <string> database user, if used
-        user: feedback-user
-        # <string> database name, if used
-        database: feedback
-        # <bool> enable/disable basic auth
-        # basicAuth:
-        # <string> basic auth username
-        # basicAuthUser:
-        # <string> basic auth password
-        # basicAuthPassword:
-        # <bool> enable/disable with credentials headers
-        # withCredentials:
-        # <bool> mark as default datasource. Max one per org
-        # isDefault:
-        # <map> fields that will be converted to json and stored in json_data
-        # jsonData:
-        #   graphiteVersion: "1.1"
-        #   tlsAuth: true
-        #   tlsAuthWithCACert: true
-        # <string> json object of data that will be encrypted.
-        # secureJsonData:
-        #   tlsCACert: "..."
-        #   tlsClientCert: "..."
-        #   tlsClientKey: "..."
-        version: 1
-        # <bool> allow users to edit datasources from the UI.
-        editable: false
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+          # <string, required> name of the datasource. Required
+        - name: Feedback-psql
+          # <string, required> datasource type. Required
+          type: postgres
+          # <string, required> access mode. proxy or direct (Server or Browser in the UI). Required
+          access: proxy
+          # <int> org id. will default to orgId 1 if not specified
+          orgId: 1
+          # <string> url
+          host: "feedback-backend"
+          # <string> database password, if used
+          password: "12345" # TODO use configmap
+          # <string> database user, if used
+          user: feedback-user
+          # <string> database name, if used
+          database: feedback
+          sslMode: disable
+          sshAuthDetailsMethod: ''
+          sshAuthDetailsValue: ''
+          maxOpen: unlimited
+          maxIdle: 2
+          maxLifetime: 14400
+          # version: 1
+          timescaleDB: false
+          # <bool> allow users to edit datasources from the UI.
+          editable: false
   dashboards:
     default:
       feedback-dashboard:
