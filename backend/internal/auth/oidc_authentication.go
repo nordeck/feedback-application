@@ -28,7 +28,7 @@ func (auth OidcAuthentication) Validate(request *http.Request) (*string, error) 
 		return nil, err
 	}
 	if validationResponse.Results.User == true && len(validationResponse.UserId) > 0 {
-		token, err := auth.generateWith(validationResponse.UserId)
+		token, err := auth.generate()
 		return &token, err
 	} else {
 		return nil, errors.New("user is not valid")
@@ -91,10 +91,9 @@ func mapFrom(respBody io.ReadCloser) (*api.ValidationResponse, error) {
 	return validationResponse, err
 }
 
-func (auth OidcAuthentication) generateWith(userId string) (string, error) {
+func (auth OidcAuthentication) generate() (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"userId": userId,
-		"nbf":    time.Now().Unix(),
+		"nbf": time.Now().Unix(),
 	})
 	tokenString, err := token.SignedString([]byte(auth.config.JwtSignature))
 
