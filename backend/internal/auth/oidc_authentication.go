@@ -10,6 +10,7 @@ import (
 	"io"
 	"net/http"
 	"regexp"
+	"strings"
 	"time"
 )
 
@@ -71,7 +72,8 @@ func extractTokenFrom(request *http.Request) (*string, error) {
 
 	matched, err := regexp.MatchString(bearerRegExp, authHeaderValue)
 	if matched {
-		return &regexp.MustCompile(`\W`).Split(authHeaderValue, -1)[1], err
+
+		return &strings.Fields(authHeaderValue)[1], err
 	}
 	err = errors.New("token value has not matched")
 	return nil, err
