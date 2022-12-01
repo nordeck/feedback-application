@@ -57,5 +57,15 @@ spec:
               servicePort: {{ $svcPort }}
               {{- end }}
           {{- end }}
+    - host: feedback-backend-grafana.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $fullName }}-grafana
+                port:
+                  number: 3000
     {{- end }}
 {{- end }}

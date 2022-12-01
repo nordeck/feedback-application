@@ -117,16 +117,11 @@ grafana:
           # <int> org id. will default to orgId 1 if not specified
           orgId: 1
           # <string> url
-          host: "feedback-backend"
-          # <string> database password, if used
-          password: "12345" # TODO use configmap
+          url: feedback-backend-postgresql.dev
           # <string> database user, if used
           user: feedback-user
           # <string> database name, if used
           database: feedback
-          sslMode: disable
-          sshAuthDetailsMethod: ''
-          sshAuthDetailsValue: ''
           maxOpen: unlimited
           maxIdle: 2
           maxLifetime: 14400
@@ -134,7 +129,29 @@ grafana:
           timescaleDB: false
           # <bool> allow users to edit datasources from the UI.
           editable: false
+          jsonData:
+            sslmode: disable
+            tlsConfigurationMethod: 'file-content'
+            sslRootCertFile: ''
+            sslCertFile: ''
+            sslKeyFile: ''
+            # postgresVersion: ''
+          secureJsonData:
+            password: "12345" # TODO use configmap
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/default
   dashboards:
     default:
       feedback-dashboard:
-        url: https://github.com/nordeck/feedback-application/blob/main/grafana/Feedback%20Dashboard-1667925476068.json
+        url: https://raw.githubusercontent.com/nordeck/feedback-application/main/grafana/Feedback%20Dashboard-1667925476068.json
+        datasource: Feedback-psql
