@@ -72,10 +72,9 @@ func extractTokenFrom(request *http.Request) (*string, error) {
 
 	matched, err := regexp.MatchString(bearerRegExp, authHeaderValue)
 	if matched {
-
 		return &strings.Fields(authHeaderValue)[1], err
 	}
-	err = errors.New("token value has not matched")
+	err = errors.New("authentication header value has not matched / is not a bearer token")
 	return nil, err
 }
 
