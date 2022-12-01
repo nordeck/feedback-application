@@ -56,7 +56,7 @@ func (c *Controller) GetRouter() http.Handler {
 func (c *Controller) createToken(writer http.ResponseWriter, request *http.Request) {
 	jwt, err := auth.New(internal.ConfigurationFromEnv()).Validate(request)
 	if err != nil {
-		http.Error(writer, err.Error(), http.StatusInternalServerError)
+		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
 

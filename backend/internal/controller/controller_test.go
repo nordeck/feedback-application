@@ -45,7 +45,7 @@ func (m *RepositoryMock) Store(value interface{}) error {
 
 }
 
-func TestController_ValidTokenToJwt(t *testing.T) {
+func Test_ValidTokenToJwt(t *testing.T) {
 	repoMock := new(RepositoryMock)
 
 	httpmock.Activate()
@@ -65,7 +65,7 @@ func TestController_ValidTokenToJwt(t *testing.T) {
 	repoMock.AssertExpectations(t)
 }
 
-func TestController_InvalidResponse(t *testing.T) {
+func Test_InvalidResponse(t *testing.T) {
 	repoMock := new(RepositoryMock)
 
 	httpmock.Activate()
@@ -79,13 +79,13 @@ func TestController_InvalidResponse(t *testing.T) {
 
 	controller.GetRouter().ServeHTTP(responseWriter, request)
 
-	assert.Equal(t, 200, responseWriter.Result().StatusCode)
+	assert.Equal(t, 400, responseWriter.Result().StatusCode)
 	actual := responseWriter.Body.String()
-	assert.True(t, strings.Contains(actual, "null"), "not the same")
+	assert.True(t, strings.Contains(actual, "user is not valid\n"), "not the same")
 	repoMock.AssertExpectations(t)
 }
 
-func TestController_InvalidToken(t *testing.T) {
+func Test_InvalidToken(t *testing.T) {
 	repoMock := new(RepositoryMock)
 
 	httpmock.Activate()
@@ -99,9 +99,9 @@ func TestController_InvalidToken(t *testing.T) {
 
 	controller.GetRouter().ServeHTTP(responseWriter, request)
 
-	assert.Equal(t, 500, responseWriter.Result().StatusCode)
+	assert.Equal(t, 400, responseWriter.Result().StatusCode)
 	actual := responseWriter.Body.String()
-	assert.True(t, strings.Contains(actual, "token value has not matched\n"), "not the same")
+	assert.True(t, strings.Contains(actual, "authentication header value has not matched / is not a bearer token\n"), "not the same")
 	repoMock.AssertExpectations(t)
 }
 

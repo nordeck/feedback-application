@@ -28,10 +28,10 @@ func (auth OidcAuthentication) Validate(request *http.Request) (*string, error) 
 		return nil, err
 	}
 	if validationResponse.Results.User == true && len(validationResponse.UserId) > 0 {
-		javaWebToken, err := auth.generateWith(validationResponse.UserId)
-		return &javaWebToken, err
+		token, err := auth.generateWith(validationResponse.UserId)
+		return &token, err
 	} else {
-		return nil, err
+		return nil, errors.New("user is not valid")
 	}
 }
 
@@ -46,9 +46,7 @@ func (auth OidcAuthentication) validate(request *http.Request) (*api.ValidationR
 		return nil, err
 	}
 
-	validationResponse, err := mapFrom(response)
-
-	return validationResponse, err
+	return mapFrom(response)
 }
 
 func (auth OidcAuthentication) createValidationRequestFrom(request *http.Request) ([]byte, error) {
