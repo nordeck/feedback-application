@@ -1,6 +1,6 @@
 apiVersion: v2
 name: feedback-backend
-description: Feedback plugin for Jitsi Meet and its backend
+description: Backend for the Jitsi Meet feedback plugin
 type: application
 version: 0.1.0
 appVersion: "0.1.0"

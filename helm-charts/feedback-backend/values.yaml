@@ -103,6 +103,8 @@ postgresql:
   auth:
     enablePostgresUser: false
     # postgresPassword: "" # postgres admin user pw
+  image:
+    tag: '15' # match with Grafana postgresVersion
 
 # passed to grafana
 grafana:
@@ -137,7 +139,7 @@ grafana:
             sslRootCertFile: ''
             sslCertFile: ''
             sslKeyFile: ''
-            postgresVersion: '15' # TODO based on postgres tag
+            postgresVersion: '15' # based on postgres tag
           secureJsonData:
             password: '{{ required "Setting a database password is required!" .Values.global.postgresql.auth.password }}'
   dashboardProviders:
