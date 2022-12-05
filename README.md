@@ -26,6 +26,8 @@ You can find documentation on how to install, configure, and use each one in the
 2. [backend](./backend/) is a REST service which verifies authorization and writes data to a database
 3. [Grafana](https://grafana.com/) can be used to visualise the data using the provided [dashboard](./grafana/)
 
+We provide Helm charts for easy deployment of the backend part in the [helm-charts](./helm-charts/feedback-backend/) directory.
+
 ### Download
 
 You can download the latest version of our feedback-application from this Github

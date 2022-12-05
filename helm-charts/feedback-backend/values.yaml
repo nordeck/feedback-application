@@ -8,7 +8,7 @@ image:
   repository: ghcr.io/nordeck/feedback-backend
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: latest
+  tag: pr-10
 
 imagePullSecrets: []
 nameOverride: ""
@@ -79,6 +79,12 @@ service:
   type: ClusterIP
   # feedback backend's REST API port
   port: 8080
+  # URL to the /verify/user endpoint of the Matrix User Verification Service
+  oidcValidationUrl: '' # Example: https://some.url/verify/user
+  # name of the matrix homeserver as it appears in the second part of Matrix User IDs
+  # note the UVS may be configured to accept only a single server name,
+  # in which case the setting of UVS and feedback backend must match
+  matrixServerName: '' # Example: domain.tld
 
 # global variables needed by the feedback backend service and dependency service
 global:

@@ -3,7 +3,9 @@ kind: ConfigMap
 metadata:
   name: backend-config
 data:
-  dbPort: {{ .Values.global.postgresql.containerPorts.postgresql | quote }}
-  dbUser: {{ .Values.global.postgresql.auth.username | quote }}
-  dbName: {{ .Values.global.postgresql.auth.database | quote }}
+  dbPort: {{ .Values.global.postgresql.containerPorts.postgresql | default "5432" | quote }}
+  dbUser: {{ required "Setting a database user is required!" .Values.global.postgresql.auth.username | quote }}
+  dbName: {{ required "Setting a database name is required!" .Values.global.postgresql.auth.database | quote }}
   dbSslMode: {{ if .Values.global.postgresql.tls.enabled }} "require" {{ else }} "disable" {{ end }}
+  oidcValidationUrl: {{ required "Setting an OIDC validation URL (Matrix UVS) is required" .Values.service.oidcValidationUrl }}
+  matrixServerName: {{ required "Setting a matrix server name is required!" .Values.service.matrixServerName }}

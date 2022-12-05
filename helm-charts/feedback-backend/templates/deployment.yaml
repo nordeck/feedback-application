@@ -61,6 +61,21 @@ spec:
                 configMapKeyRef:
                   name: backend-config
                   key: dbSslMode
+            - name: OIDC_VALIDATION_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: oidcValidationUrl
+            - name: JWT_SIGNATURE
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: jwtSecret
+            - name: MATRIX_SERVER_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: matrixServerName
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
