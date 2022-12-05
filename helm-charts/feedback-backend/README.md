@@ -21,6 +21,7 @@ This Helm chart **will not** set up and configure all the other components of a 
 
 While this Helm chart tries to stick to reasonable defaults, you still need to configure a few settings to match your existing deployment:
 
+- `global.postgresql.auth.password`
 - `service.oidcValidationUrl`
 - `service.matrixServerName`
 

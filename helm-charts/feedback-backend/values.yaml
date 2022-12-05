@@ -91,7 +91,7 @@ global:
   postgresql:
     auth:
       username: feedback-user
-      password: "12345"
+      password: ""
       database: feedback
     containerPorts:
       postgresql: "5432"
@@ -139,7 +139,7 @@ grafana:
             sslKeyFile: ''
             postgresVersion: '15' # TODO based on postgres tag
           secureJsonData:
-            password: "{{ .Values.global.postgresql.auth.password }}"
+            password: '{{ required "Setting a database password is required!" .Values.global.postgresql.auth.password }}'
   dashboardProviders:
     dashboardproviders.yaml:
       apiVersion: 1
