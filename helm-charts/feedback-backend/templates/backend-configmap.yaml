@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: backend-config
+data:
+  dbPort: {{ .Values.global.postgresql.containerPorts.postgresql | quote }}
+  dbUser: {{ .Values.global.postgresql.auth.username | quote }}
+  dbName: {{ .Values.global.postgresql.auth.database | quote }}
+  dbSslMode: {{ if .Values.global.postgresql.tls.enabled }} "require" {{ else }} "disable" {{ end }}

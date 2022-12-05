@@ -57,7 +57,7 @@ spec:
               servicePort: {{ $svcPort }}
               {{- end }}
           {{- end }}
-    - host: feedback-backend-grafana.dev
+    - host: {{ $fullName }}-grafana
       http:
         paths:
           - path: /

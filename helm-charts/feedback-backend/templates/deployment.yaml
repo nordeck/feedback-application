@@ -35,17 +35,32 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: DB_HOST
-              value: {{ .Values.db.host | quote }}
+              value: {{ .Chart.Name }}-postgresql
             - name: DB_PORT
-              value: {{ .Values.db.port | quote }}
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: dbPort
             - name: DB_USER
-              value: {{ .Values.db.user | quote }}
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: dbUser
             - name: DB_PASSWORD
-              value: {{ .Values.db.password | quote }}
+              valueFrom:
+                secretKeyRef:
+                  name: backend-secrets
+                  key: dbPassword
             - name: DB_NAME
-              value: {{ .Values.db.name | quote }}
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: dbName
             - name: SSL_MODE
-              value: {{ if .Values.db.ssl }} "require" {{ else }} "disable" {{ end }}
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: dbSslMode
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}

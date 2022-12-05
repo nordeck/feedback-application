@@ -36,10 +36,6 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 
-service:
-  type: ClusterIP
-  port: 8080
-
 ingress:
   enabled: true
   className: ""
@@ -47,14 +43,11 @@ ingress:
     kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   hosts:
-    - host: feedback-backend.dev
+    - host: feedback-backend # .Chart.Name
       paths:
         - path: /
           pathType: ImplementationSpecific
   tls: []
-  #  - secretName: chart-example-tls
-  #    hosts:
-  #      - chart-example.local
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -82,25 +75,28 @@ tolerations: []
 affinity: {}
 
 # passed to the feedback-application backend
-db:
-  host: feedback-backend-postgresql.dev
-  port: "5432"
-  user: feedback-user
-  password: "12345"
-  name: feedback
-  ssl: false # TODO: https://www.postgresql.org/docs/9.1/libpq-ssl.html
+service:
+  type: ClusterIP
+  # feedback backend's REST API port
+  port: 8080
 
-# passed to postgres
+# global variables needed by the feedback backend service and dependency service
+global:
+  postgresql:
+    auth:
+      username: feedback-user
+      password: "12345"
+      database: feedback
+    containerPorts:
+      postgresql: "5432"
+    tls:
+      enabled: false
+
+# private to postgres
 postgresql:
   auth:
-    username: feedback-user
-    password: "12345"
-    database: feedback
     enablePostgresUser: false
-    # postgresPassword: "54321"
-  containerPorts.postgresql: "5432"
-  tls:
-    enabled: false
+    # postgresPassword: "" # postgres admin user pw
 
 # passed to grafana
 grafana:
@@ -116,12 +112,12 @@ grafana:
           access: proxy
           # <int> org id. will default to orgId 1 if not specified
           orgId: 1
-          # <string> url
-          url: feedback-backend-postgresql.dev
+          # <string> url. made up of this Chart's name and the name of the database dependency
+          url: "feedback-backend-postgresql:{{ .Values.global.postgresql.containerPorts.postgresql }}"
           # <string> database user, if used
-          user: feedback-user
+          user: "{{ .Values.global.postgresql.auth.username }}"
           # <string> database name, if used
-          database: feedback
+          database: "{{ .Values.global.postgresql.auth.database }}"
           maxOpen: unlimited
           maxIdle: 2
           maxLifetime: 14400
@@ -135,9 +131,9 @@ grafana:
             sslRootCertFile: ''
             sslCertFile: ''
             sslKeyFile: ''
-            # postgresVersion: ''
+            postgresVersion: '15' # TODO based on postgres tag
           secureJsonData:
-            password: "12345" # TODO use configmap
+            password: "{{ .Values.global.postgresql.auth.password }}"
   dashboardProviders:
     dashboardproviders.yaml:
       apiVersion: 1
