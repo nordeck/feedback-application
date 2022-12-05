@@ -26,6 +26,9 @@ While this Helm chart tries to stick to reasonable defaults, you still need to c
 - `global.postgresql.auth.password`
 - `service.oidcValidationUrl`
 - `service.matrixServerName`
+- `ingress.hosts.host`
+- `ingress.tls`
+- `ingress.grafanaHost`
 
 Further notable values are:
 

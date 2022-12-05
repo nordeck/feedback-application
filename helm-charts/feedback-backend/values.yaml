@@ -36,19 +36,6 @@ securityContext: {}
   # runAsNonRoot: true
   # runAsUser: 1000
 
-ingress:
-  enabled: true
-  className: ""
-  annotations:
-    kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-  hosts:
-    - host: feedback-backend # .Chart.Name
-      paths:
-        - path: /
-          pathType: ImplementationSpecific
-  tls: []
-
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
@@ -73,6 +60,20 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+ingress:
+  enabled: true
+  className: ""
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: feedback-backend # domain where the feedback backend should be reachable
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  grafanaHost: grafana.feedback-backend
 
 # passed to the feedback-application backend
 service:

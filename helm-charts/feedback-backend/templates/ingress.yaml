@@ -33,6 +33,9 @@ spec:
         {{- range .hosts }}
         - {{ . | quote }}
         {{- end }}
+        {{- if  .Values.ingress.grafanaHost }}
+        - {{ .Values.ingress.grafanaHost }}
+        {{- end }}
       secretName: {{ .secretName }}
     {{- end }}
   {{- end }}
@@ -57,7 +60,8 @@ spec:
               servicePort: {{ $svcPort }}
               {{- end }}
           {{- end }}
-    - host: {{ $fullName }}-grafana
+    {{- end }}
+    - host: {{ .Values.ingress.grafanaHost | default (printf "%s-grafana" $fullName) }}
       http:
         paths:
           - path: /
@@ -67,5 +71,4 @@ spec:
                 name: {{ $fullName }}-grafana
                 port:
                   number: 3000
-    {{- end }}
 {{- end }}
