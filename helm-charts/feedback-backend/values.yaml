@@ -93,8 +93,8 @@ global:
       username: feedback-user
       password: ""
       database: feedback
-    containerPorts:
-      postgresql: "5432"
+    # containerPorts:
+    #   postgresql: "5432"
     tls:
       enabled: false
 
@@ -121,7 +121,8 @@ grafana:
           # <int> org id. will default to orgId 1 if not specified
           orgId: 1
           # <string> url. made up of this Chart's name and the name of the database dependency
-          url: "feedback-backend-postgresql:{{ .Values.global.postgresql.containerPorts.postgresql }}"
+          url: "{{- $containerPorts := .Values.global.postgresql.containerPorts | default dict -}}
+                feedback-backend-postgresql:{{ $containerPorts.postgresql | default 5432 }}"
           # <string> database user, if used
           user: "{{ .Values.global.postgresql.auth.username }}"
           # <string> database name, if used
