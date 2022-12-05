@@ -134,11 +134,12 @@ grafana:
           # <bool> allow users to edit datasources from the UI.
           editable: false
           jsonData:
-            sslmode: disable
+            sslmode: "{{ if .Values.global.postgresql.tls.enabled }}require{{ else }}disable{{ end -}}"
             tlsConfigurationMethod: 'file-content'
             sslRootCertFile: ''
             sslCertFile: ''
             sslKeyFile: ''
+            # Postgres version as a number (903/904/905/906/1000) meaning v9.3, v9.4, …, v10
             postgresVersion: '15' # based on postgres tag
           secureJsonData:
             password: '{{ required "Setting a database password is required!" .Values.global.postgresql.auth.password }}'

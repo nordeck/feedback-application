@@ -29,6 +29,7 @@ Further notable values are:
 
 - `image.tag` to deploy an image other than `appVersion`
 - `image.repository` if you build your own images of the feedback-backend
+- `global.postgresql.tls.enabled` (`true`/`false`) will also switch feedback-backend and Grafana between `disable` and `require`
 
 For detailed documentation of all possible values, refer to the comments in the [`values.yaml`](values.yaml) file.
 
