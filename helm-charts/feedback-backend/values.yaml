@@ -153,5 +153,5 @@ grafana:
   dashboards:
     default:
       feedback-dashboard:
-        url: https://raw.githubusercontent.com/nordeck/feedback-application/main/grafana/Feedback%20Dashboard-1667925476068.json
+        url: https://raw.githubusercontent.com/nordeck/feedback-application/main/grafana/Feedback%20Dashboard-1669906814000.json
         datasource: Feedback-psql
