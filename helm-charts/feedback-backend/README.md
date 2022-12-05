@@ -8,6 +8,8 @@ This Helm chart will install and configure for you:
 - A PostgreSQL database as persistent storage for the backend, using the [bitnami/postgresql](https://github.com/bitnami/charts/tree/main/bitnami/postgresql) Helm chart
 - Optionally, a non-persistent Grafana preconfigured with the provided [dashboard](/grafana) and the mentioned database as datasource
 
+## Required Dependencies
+
 This Helm chart **will not** set up and configure all the other components of a Matrix + Jitsi deployment. You need to do this yourself, in particular the following are required:
 
 - Synapse, the Matrix homeserver
@@ -33,3 +35,8 @@ Further notable values are:
 
 For detailed documentation of all possible values, refer to the comments in the [`values.yaml`](values.yaml) file.
 
+## Usage
+
+Note that this chart depends on additional infrastructure as mentioned [above](#required-dependencies).
+
+Install in the usual way: for example `git clone` this repo and run `helm upgrade --install feedback-backend feedback-application/helm-charts/feedback-backend`.
