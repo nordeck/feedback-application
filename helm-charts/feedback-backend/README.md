@@ -16,7 +16,7 @@ This Helm chart **will not** set up and configure all the other components of a 
   - [Matrix User Verification Service](https://github.com/matrix-org/matrix-user-verification-service/), a Synapse plugin
 - Jitsi
   - [Prosody Auth Matrix User Verification](https://github.com/matrix-org/prosody-mod-auth-matrix-user-verification) module
-  - Our (jitsi-feedback-plugin)[/jitsi-feedback-plugin] installed
+  - Our [jitsi-feedback-plugin](/jitsi-feedback-plugin) installed
 - Element, the Matrix client, configured to use the above Jitsi deployment
 
 ## Configuration
