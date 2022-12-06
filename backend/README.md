@@ -48,6 +48,69 @@ You will need to set the following variables.
 
 The database is versioned using the goose plugin for go.
 
+## API endpoints
+
+These endpoints allow you handle feedback-data.
+
+### GET /token.json
+
+Gets a JWT when OIDC is valid `jitsi client only`
+
+**Headers**
+* An authentication header with the oidc token as value is mandatory.
+
+**Parameters**
+none
+
+**Response**
+
+```
+< HTTP/1.1 200 OK
+{
+    "jwt": "some.valid.jwt"
+}
+
+or an error message
+
+< HTTP/1.1 500 Internal Server Error
+{
+    "error": "some error code",
+    "message": "some error message"
+}
+```
+
+### POST /feedback.json
+
+Creates and persists feedback and its metadata
+
+**Headers**
+* An authentication header with a valid jwt is mandatory.
+
+**Parameters**
+
+|             Name |    Type     | Description                                                                      |
+|-----------------:|:-----------:|----------------------------------------------------------------------------------|
+|         `rating` |     int     | The rating for a given call <br/><br/> Supported values: `1` to `5`              |
+| `rating_comment` |   string    | A comment for the rating <br/><br/> Supported length for Publish: varchar(1024). |
+|       `metadata` | map[string] | a map of custom strings (call metadata)                                          |
+
+**Response**
+
+```
+< HTTP/1.1 200 OK
+{
+    "success": true
+}
+
+or an error message
+
+< HTTP/1.1 500 Internal Server Error
+{
+    "error": "some error code",
+    "message": "some error message"
+}
+```
+
 ## Credits
 
 This software uses the following open source packages:
