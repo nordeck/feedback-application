@@ -90,11 +90,11 @@ Creates and persists feedback and its metadata
 
 **request body (json)**
 
-|             Name |    Type     | Description                                                          |
-|-----------------:|:-----------:|----------------------------------------------------------------------|
-|         `rating` |     int     | The rating for a given call <br/><br/> Supported values: `1` to `5`  |
-| `rating_comment` |   string    | A comment for the rating <br/><br/> Supported length: varchar(1024). |
-|       `metadata` | map[string] | a map of custom strings (call metadata)                              |
+|             Name |           Type           | Description                                                          |
+|-----------------:|:------------------------:|----------------------------------------------------------------------|
+|         `rating` |           int            | The rating for a given call <br/><br/> Supported values: `1` to `5`  |
+| `rating_comment` |          string          | A comment for the rating <br/><br/> Supported length: varchar(1024). |
+|       `metadata` | gorm-jsonb (map[string]) | a map of custom strings (call metadata)                              |
 
 **Response**
 
