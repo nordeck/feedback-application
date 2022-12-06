@@ -86,7 +86,7 @@ Creates and persists feedback and its metadata
 **Headers**
 * An authentication header with a valid jwt is mandatory.
 
-**Parameters**
+**request body**
 
 |             Name |    Type     | Description                                                                      |
 |-----------------:|:-----------:|----------------------------------------------------------------------------------|
