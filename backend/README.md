@@ -54,7 +54,7 @@ These endpoints allow you handle feedback-data.
 
 ### GET /token
 
-Gets a JWT when OIDC is valid `jitsi client only`
+Gets a JWT when OIDC is valid
 
 **Accepts**
 JSON
@@ -89,7 +89,6 @@ Creates and persists feedback and its metadata
 
 **Accepts**
 JSON
-
 
 **Headers**
 
