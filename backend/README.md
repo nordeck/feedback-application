@@ -52,9 +52,12 @@ The database is versioned using the goose plugin for go.
 
 These endpoints allow you handle feedback-data.
 
-### GET /token.json
+### GET /token
 
 Gets a JWT when OIDC is valid `jitsi client only`
+
+**Accepts**
+JSON
 
 **Headers**
 
@@ -80,9 +83,13 @@ or an error message
 }
 ```
 
-### POST /feedback.json
+### POST /feedback
 
 Creates and persists feedback and its metadata
+
+**Accepts**
+JSON
+
 
 **Headers**
 
