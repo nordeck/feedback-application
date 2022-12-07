@@ -125,7 +125,7 @@ or an error message
 unexpected end of JSON input
 
 ```
-
+ OPTIONS are available on /token and /feedback as well.
 ## Credits
 
 This software uses the following open source packages:
