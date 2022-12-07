@@ -58,7 +58,7 @@ Gets a JWT when OIDC is valid
 
 **Headers**
 
-* The existence of an authentication header with the oidc token as value is mandatory ("Authentication", "
+* The existence of an authentication header with the oidc token as value is mandatory ("authorization", "
   Bearer `OIDC_TOKEN_VALUE`")..
 
 **Parameters**
@@ -95,7 +95,7 @@ json
 
 **Headers**
 
-* The existence of an authentication header with a valid jwt is mandatory ("Authentication", "Bearer `JWT_VALUE`").
+* The existence of an authentication header with a valid jwt is mandatory ("authorization", "Bearer `JWT_VALUE`").
 
 **request body (json)**
 
