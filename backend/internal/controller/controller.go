@@ -47,8 +47,8 @@ func New(repo repository.Interface, serv *auth.OidcAuthentication) *Controller {
 
 func (c *Controller) GetRouter() http.Handler {
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc(TokenPath, c.createToken).Methods(http.MethodGet)
-	router.HandleFunc(FeedbackPath, c.createFeedback).Methods(http.MethodPost)
+	router.HandleFunc(TokenPath, c.createToken).Methods(http.MethodGet, http.MethodOptions)
+	router.HandleFunc(FeedbackPath, c.createFeedback).Methods(http.MethodPost, http.MethodOptions)
 
 	return router
 }

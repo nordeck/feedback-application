@@ -41,6 +41,7 @@ You will need to set the following variables.
 | OIDC_VALIDATION_URL       | the URL of the MVS the OIDC Token has to be validated against | https://some.url/verify/user |
 | JWT_SECRET                | Some unique String the JWT will get signed with               | someArbitraryString          |
 | MATRIX_SERVER_NAME        | The server name which the OIDC token is validated against     | domain.tld                   |
+| UVS_AUTH_TOKEN            | auth Token for UVS                                            | someToken                    |
 
 </div>
 

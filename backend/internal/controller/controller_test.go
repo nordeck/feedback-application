@@ -65,6 +65,26 @@ func Test_ValidTokenToJwt(t *testing.T) {
 	repoMock.AssertExpectations(t)
 }
 
+func Test_ValidTokenToJwtWithOptions(t *testing.T) {
+	repoMock := new(RepositoryMock)
+
+	httpmock.Activate()
+	response := httpmock.NewStringResponder(200, "{\n  \"results\": {\n    \"user\": true\n  },\n  \"user_id\": \"@user:domain.tld\"\n}")
+	httpmock.RegisterResponder("POST", "https://some.url/verify/user", response)
+
+	controller := New(repoMock, nil)
+	request := httptest.NewRequest(http.MethodOptions, "/token", nil)
+	request.Header.Set("authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJpbmNvbWluZyIsIm5hbWUiOiJKb2huIERvZSIsImlhdCI6MTUxNjIzOTAyMn0.0DoNIGqCNa1Tc41par4bzqnQWwlgsKCIP2mgUYEHemM")
+	responseWriter := httptest.NewRecorder()
+
+	controller.GetRouter().ServeHTTP(responseWriter, request)
+
+	assert.Equal(t, 200, responseWriter.Result().StatusCode)
+	actual := responseWriter.Body.String()
+	assert.True(t, strings.Contains(actual, "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."), "not the same")
+	repoMock.AssertExpectations(t)
+}
+
 func Test_InvalidResponse(t *testing.T) {
 	repoMock := new(RepositoryMock)
 
@@ -129,6 +149,37 @@ func TestController_CreateFeedback(t *testing.T) {
 		Metadata:      metadata,
 	})
 	request := httptest.NewRequest(http.MethodPost, "/feedback", bytes.NewReader(requestBody))
+	responseWriter := httptest.NewRecorder()
+
+	controller.GetRouter().ServeHTTP(responseWriter, request)
+	assert.Equal(t, 200, responseWriter.Result().StatusCode)
+	repoMock.AssertExpectations(t)
+}
+
+func TestController_CreateFeedbackWithOptions(t *testing.T) {
+	ratingComment := "any_comment"
+	rating := 3
+
+	repoMock := new(RepositoryMock)
+	expected := &repository.Feedback{
+		Rating:        rating,
+		RatingComment: ratingComment,
+		Metadata:      gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"},
+	}
+	repoMock.On("Store", expected).Return(nil)
+	controller := New(repoMock, nil)
+
+	metadata := map[string]interface{}{
+		"first_key":  "first_value",
+		"second_key": "second_value",
+	}
+
+	requestBody, _ := json.Marshal(&api.Feedback{
+		Rating:        rating,
+		RatingComment: ratingComment,
+		Metadata:      metadata,
+	})
+	request := httptest.NewRequest(http.MethodOptions, "/feedback", bytes.NewReader(requestBody))
 	responseWriter := httptest.NewRecorder()
 
 	controller.GetRouter().ServeHTTP(responseWriter, request)
