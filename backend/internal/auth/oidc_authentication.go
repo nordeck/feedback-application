@@ -95,7 +95,7 @@ func (auth OidcAuthentication) generate() (string, error) {
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"nbf": time.Now().Unix(),
 	})
-	tokenString, err := token.SignedString([]byte(auth.config.JwtSignature))
+	tokenString, err := token.SignedString([]byte(auth.config.JwtSecret))
 
 	return tokenString, err
 }

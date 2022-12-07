@@ -39,7 +39,7 @@ You will need to set the following variables.
 | DB_NAME                   | Database name                                                 | someDatabase                 |
 | SSL_MODE                  | Use SSL (enable or disable)                                   | disable                      |
 | OIDC_VALIDATION_URL       | the URL of the MVS the OIDC Token has to be validated against | https://some.url/verify/user |
-| JWT_SIGNATURE             | Some unique String the JWT will get signed with               | someArbitraryString          |
+| JWT_SECRET                | Some unique String the JWT will get signed with               | someArbitraryString          |
 | MATRIX_SERVER_NAME        | The server name which the OIDC token is validated against     | domain.tld                   |
 
 </div>
@@ -56,12 +56,10 @@ These endpoints allow you handle feedback-data.
 
 Gets a JWT when OIDC is valid
 
-**Accepts**
-JSON
-
 **Headers**
 
-* An authentication header with the oidc token as value is mandatory.
+* The existence of an authentication header with the oidc token as value is mandatory ("Authentication", "
+  Bearer `OIDC_TOKEN_VALUE`")..
 
 **Parameters**
 none
@@ -93,19 +91,19 @@ authentication header is empty!
 Creates and persists feedback and its metadata
 
 **Accepts**
-JSON
+json
 
 **Headers**
 
-* An authentication header with a valid jwt is mandatory.
+* The existence of an authentication header with a valid jwt is mandatory ("Authentication", "Bearer `JWT_VALUE`").
 
 **request body (json)**
 
-|             Name |           Type           | Description                                                          |
-|-----------------:|:------------------------:|----------------------------------------------------------------------|
-|         `rating` |           int            | The rating for a given call <br/><br/> Supported values: `1` to `5`  |
-| `rating_comment` |          string          | A comment for the rating <br/><br/> Supported length: varchar(1024). |
-|       `metadata` | gorm-jsonb (map[string]) | a map of custom strings (call metadata)                              |
+|             Name |           Type           | Description                                                                                                          |
+|-----------------:|:------------------------:|----------------------------------------------------------------------------------------------------------------------|
+|         `rating` |           int            | The rating for a given call <br/><br/> Supported values: range of int <br/> <i> Jitsi sends values from -1 .. 5 </i> |
+| `rating_comment` |          string          | A comment for the rating <br/><br/> Supported length: varchar(1024).                                                 |
+|       `metadata` | gorm-jsonb (map[string]) | a map of custom strings (call metadata)                                                                              |
 
 **Response**
 
