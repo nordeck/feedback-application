@@ -59,7 +59,9 @@ func (c *Controller) createToken(writer http.ResponseWriter, request *http.Reque
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
-
+	writer.Header().Set("Access-Control-Allow-Origin", "*")
+	writer.Header().Set("Access-Control-Allow-Headers", "*")
+	writer.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
 	err = json.NewEncoder(writer).Encode(jwt)
 
 	if err != nil {
