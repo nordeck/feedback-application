@@ -41,7 +41,7 @@ func (auth OidcAuthentication) validate(request *http.Request) (*api.ValidationR
 		return nil, err
 	}
 
-	response, err := client.Post(auth.config.OidcValidationUrl, requestBody)
+	response, err := client.Post(auth.config, requestBody)
 	if err != nil {
 		return nil, err
 	}

@@ -33,6 +33,7 @@ type Configuration struct {
 	OidcValidationUrl string // OIDC_VALIDATION_URL
 	JwtSecret         string // JWT_SECRET
 	MatrixServerName  string // MATRIX_SERVER_NAME
+	UvsAuthToken      string // UVS_AUTH_TOKEN
 }
 
 func ConfigurationFromEnv() *Configuration {
@@ -46,6 +47,7 @@ func ConfigurationFromEnv() *Configuration {
 		os.Getenv("OIDC_VALIDATION_URL"),
 		os.Getenv("JWT_SECRET"),
 		os.Getenv("MATRIX_SERVER_NAME"),
+		os.Getenv("UVS_AUTH_TOKEN"),
 	}
 
 	elements := reflect.ValueOf(&config).Elem()
