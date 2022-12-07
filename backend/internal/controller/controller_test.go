@@ -79,7 +79,7 @@ func Test_ValidTokenToJwtWithOptions(t *testing.T) {
 
 	controller.GetRouter().ServeHTTP(responseWriter, request)
 
-	assert.Equal(t, 200, responseWriter.Result().StatusCode)
+	assert.Equal(t, 204, responseWriter.Result().StatusCode)
 	actual := responseWriter.Body.String()
 	assert.True(t, len(actual) == 0)
 	repoMock.AssertExpectations(t)
@@ -177,7 +177,8 @@ func TestController_CreateFeedbackWithOptions(t *testing.T) {
 	responseWriter := httptest.NewRecorder()
 
 	controller.GetRouter().ServeHTTP(responseWriter, request)
-	assert.Equal(t, 200, responseWriter.Result().StatusCode)
+	assert.Equal(t, 204, responseWriter.Result().StatusCode)
+	assert.Equal(t, "GET,HEAD,PUT,PATCH,POST,DELETE", responseWriter.Result().Header.Get("Access-Control-Allow-Methods"))
 }
 
 func TestController_CreateFeedback_emptyBody(t *testing.T) {

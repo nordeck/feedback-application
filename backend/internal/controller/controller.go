@@ -93,7 +93,8 @@ func (c *Controller) createFeedback(writer http.ResponseWriter, request *http.Re
 
 func (c *Controller) returnOptions(writer http.ResponseWriter, request *http.Request) {
 	writer.Header().Set("Access-Control-Allow-Origin", "*")
-	writer.Header().Set("Access-Control-Allow-Headers", "Authorization")
-	writer.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+	writer.Header().Set("Access-Control-Allow-Headers", request.Header.Get("Access-Control-Request-Headers"))
+	writer.Header().Set("Access-Control-Allow-Methods", "GET,HEAD,PUT,PATCH,POST,DELETE")
+	writer.WriteHeader(http.StatusNoContent)
 	return
 }
