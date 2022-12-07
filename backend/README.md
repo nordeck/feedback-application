@@ -70,17 +70,22 @@ none
 
 ```
 < HTTP/1.1 200 OK
-{
-    "jwt": "some.valid.jwt"
-}
+< Date: Wed, 07 Dec 2022 09:10:33 GMT
+< Content-Length: 324
+< Content-Type: text/plain; charset=utf-8
+< 
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYmYiOjAsIm9pZGNUb2tlbiI6IiBleUpoYkdjaU9pSklVekkxTmlJc0luUjVjQ0k2SWtwWFZDSjkuZXlKemRXSWlPaUl4TWpNME5UWTNPRGt3SWl3aWJtRnRaU0k2SWtwdmFHNGdSRzlsSWl3aWFXRjBJam94TlRFMk1qTTVNREl5ZlEuU2ZsS3h3UkpTTWVLS0YyUVQ0ZndwTWVKZjM2UE9rNnlKVl9hZFFzc3c1YyJ9.d-GzOJ1eowcXglnzC_QziFfhmb9fRYnGftyfHAha3Rc"
 
 or an error message
 
 < HTTP/1.1 500 Internal Server Error
-{
-    "error": "some error code",
-    "message": "some error message"
-}
+< Content-Type: text/plain; charset=utf-8
+< X-Content-Type-Options: nosniff
+< Date: Wed, 07 Dec 2022 09:12:12 GMT
+< Content-Length: 32
+< 
+authentication header is empty!
+
 ```
 
 ### POST /feedback
@@ -106,17 +111,20 @@ JSON
 
 ```
 < HTTP/1.1 200 OK
-{
-    "success": true
-}
+< Date: Wed, 07 Dec 2022 09:10:33 GMT
+< Content-Length: 324
+< Content-Type: text/plain; charset=utf-8
 
 or an error message
 
-< HTTP/1.1 500 Internal Server Error
-{
-    "error": "some error code",
-    "message": "some error message"
-}
+< HTTP/1.1 400 Bad Request
+< Content-Type: text/plain; charset=utf-8
+< X-Content-Type-Options: nosniff
+< Date: Wed, 07 Dec 2022 09:14:12 GMT
+< Content-Length: 29
+< 
+unexpected end of JSON input
+
 ```
 
 ## Credits
