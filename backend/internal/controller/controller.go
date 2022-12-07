@@ -47,9 +47,10 @@ func New(repo repository.Interface, serv *auth.OidcAuthentication) *Controller {
 
 func (c *Controller) GetRouter() http.Handler {
 	router := mux.NewRouter().StrictSlash(true)
-	router.HandleFunc(TokenPath, c.createToken).Methods(http.MethodGet, http.MethodOptions)
-	router.HandleFunc(FeedbackPath, c.createFeedback).Methods(http.MethodPost, http.MethodOptions)
-
+	router.HandleFunc(TokenPath, c.createToken).Methods(http.MethodGet)
+	router.HandleFunc(TokenPath, c.returnOptions).Methods(http.MethodOptions)
+	router.HandleFunc(FeedbackPath, c.createFeedback).Methods(http.MethodPost)
+	router.HandleFunc(FeedbackPath, c.returnOptions).Methods(http.MethodOptions)
 	return router
 }
 
@@ -59,9 +60,6 @@ func (c *Controller) createToken(writer http.ResponseWriter, request *http.Reque
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
-	writer.Header().Set("Access-Control-Allow-Origin", "*")
-	writer.Header().Set("Access-Control-Allow-Headers", "*")
-	writer.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
 	err = json.NewEncoder(writer).Encode(jwt)
 
 	if err != nil {
@@ -91,4 +89,11 @@ func (c *Controller) createFeedback(writer http.ResponseWriter, request *http.Re
 		log.Debug(err)
 		return
 	}
+}
+
+func (c *Controller) returnOptions(writer http.ResponseWriter, request *http.Request) {
+	writer.Header().Set("Access-Control-Allow-Origin", "*")
+	writer.Header().Set("Access-Control-Allow-Headers", "Authorization")
+	writer.Header().Set("Access-Control-Allow-Methods", "GET, OPTIONS")
+	return
 }
