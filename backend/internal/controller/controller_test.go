@@ -24,6 +24,7 @@ import (
 	"feedback/internal/api"
 	"feedback/internal/repository"
 	gormjsonb "github.com/dariubs/gorm-jsonb"
+	"github.com/golang-jwt/jwt"
 	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
@@ -125,11 +126,13 @@ func Test_InvalidToken(t *testing.T) {
 	repoMock.AssertExpectations(t)
 }
 
-func TestController_CreateFeedback(t *testing.T) {
+func TestController_CreateFeedback_Authorized(t *testing.T) {
+
 	ratingComment := "any_comment"
 	rating := 3
 
 	repoMock := new(RepositoryMock)
+
 	expected := &repository.Feedback{
 		Rating:        rating,
 		RatingComment: ratingComment,
@@ -149,11 +152,85 @@ func TestController_CreateFeedback(t *testing.T) {
 		Metadata:      metadata,
 	})
 	request := httptest.NewRequest(http.MethodPost, "/feedback", bytes.NewReader(requestBody))
+	mySigningKey := []byte("someArbitraryString")
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &jwt.StandardClaims{})
+	signedTokenString, _ := token.SignedString(mySigningKey)
+	request.Header.Set("authorization", "Bearer "+signedTokenString)
 	responseWriter := httptest.NewRecorder()
 
 	controller.GetRouter().ServeHTTP(responseWriter, request)
+
 	assert.Equal(t, 200, responseWriter.Result().StatusCode)
 	repoMock.AssertExpectations(t)
+}
+
+func TestController_CreateFeedback_Unauthorized_WrongSigningKey(t *testing.T) {
+
+	ratingComment := "any_comment"
+	rating := 3
+
+	repoMock := new(RepositoryMock)
+
+	controller := New(repoMock, nil)
+
+	metadata := map[string]interface{}{
+		"first_key":  "first_value",
+		"second_key": "second_value",
+	}
+
+	requestBody, _ := json.Marshal(&api.Feedback{
+		Rating:        rating,
+		RatingComment: ratingComment,
+		Metadata:      metadata,
+	})
+	request := httptest.NewRequest(http.MethodPost, "/feedback", bytes.NewReader(requestBody))
+	mySigningKey := []byte("someInvalidSigningKey")
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &jwt.StandardClaims{})
+	signedTokenString, _ := token.SignedString(mySigningKey)
+	request.Header.Set("authorization", "Bearer "+signedTokenString)
+	responseWriter := httptest.NewRecorder()
+
+	controller.GetRouter().ServeHTTP(responseWriter, request)
+
+	assert.Equal(t, 401, responseWriter.Result().StatusCode)
+	repoMock.AssertExpectations(t)
+}
+
+func TestController_CreateFeedback_MalformedToken(t *testing.T) {
+
+	ratingComment := "any_comment"
+	rating := 3
+
+	repoMock := new(RepositoryMock)
+
+	expected := &repository.Feedback{
+		Rating:        rating,
+		RatingComment: ratingComment,
+		Metadata:      gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"},
+	}
+	repoMock.On("Store", expected).Return(nil)
+	controller := New(repoMock, nil)
+
+	metadata := map[string]interface{}{
+		"first_key":  "first_value",
+		"second_key": "second_value",
+	}
+
+	requestBody, _ := json.Marshal(&api.Feedback{
+		Rating:        rating,
+		RatingComment: ratingComment,
+		Metadata:      metadata,
+	})
+	request := httptest.NewRequest(http.MethodPost, "/feedback", bytes.NewReader(requestBody))
+	mySigningKey := []byte("someArbitraryString")
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &jwt.StandardClaims{})
+	signedTokenString, _ := token.SignedString(mySigningKey)
+	request.Header.Set("authorization", "Bearer "+strings.Split(signedTokenString, ".")[0])
+	responseWriter := httptest.NewRecorder()
+
+	controller.GetRouter().ServeHTTP(responseWriter, request)
+
+	assert.Equal(t, 401, responseWriter.Result().StatusCode)
 }
 
 func TestController_CreateFeedbackWithOptions(t *testing.T) {
@@ -191,7 +268,7 @@ func TestController_CreateFeedback_emptyBody(t *testing.T) {
 	controller.GetRouter().ServeHTTP(responseWriter, request)
 
 	status := responseWriter.Result().StatusCode
-	assert.Equal(t, 400, status)
+	assert.Equal(t, 401, status)
 	repoMock.AssertNotCalled(t, "Store", mock.Anything)
 }
 
@@ -205,7 +282,7 @@ func TestController_CreateFeedback_invalidJson(t *testing.T) {
 	controller.GetRouter().ServeHTTP(responseWriter, request)
 
 	status := responseWriter.Result().StatusCode
-	assert.Equal(t, 400, status)
+	assert.Equal(t, 401, status)
 	repoMock.AssertNotCalled(t, "Store", mock.Anything)
 }
 
@@ -219,6 +296,10 @@ func TestController_CreateFeedback_databaseError(t *testing.T) {
 		RatingComment: "any",
 	})
 	request := httptest.NewRequest(http.MethodPost, "/feedback", bytes.NewReader(requestBody))
+	mySigningKey := []byte("someArbitraryString")
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &jwt.StandardClaims{})
+	signedTokenString, _ := token.SignedString(mySigningKey)
+	request.Header.Set("authorization", "Bearer "+signedTokenString)
 	responseWriter := httptest.NewRecorder()
 
 	controller.GetRouter().ServeHTTP(responseWriter, request)

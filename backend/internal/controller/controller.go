@@ -69,6 +69,11 @@ func (c *Controller) createToken(writer http.ResponseWriter, request *http.Reque
 }
 
 func (c *Controller) createFeedback(writer http.ResponseWriter, request *http.Request) {
+	authorized, err := auth.New(internal.ConfigurationFromEnv()).IsAuthorized(request)
+	if err != nil || !authorized {
+		http.Error(writer, err.Error(), http.StatusUnauthorized)
+		return
+	}
 	var feedback api.Feedback
 	body, err := io.ReadAll(request.Body)
 	if err != nil {
