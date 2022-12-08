@@ -24,12 +24,16 @@ import (
 )
 
 type Configuration struct {
-	DbHost     string // DB_HOST
-	DbPort     string // DB_PORT
-	DbUser     string // DB_USER
-	DbPassword string // DB_PASSWORD
-	DbName     string // DB_NAME
-	Sslmode    string "disable" // SSL_MODE
+	DbHost            string // DB_HOST
+	DbPort            string // DB_PORT
+	DbUser            string // DB_USER
+	DbPassword        string // DB_PASSWORD
+	DbName            string // DB_NAME
+	Sslmode           string "disable" // SSL_MODE
+	OidcValidationUrl string // OIDC_VALIDATION_URL
+	JwtSecret         string // JWT_SECRET
+	MatrixServerName  string // MATRIX_SERVER_NAME
+	UvsAuthToken      string // UVS_AUTH_TOKEN
 }
 
 func ConfigurationFromEnv() *Configuration {
@@ -40,6 +44,10 @@ func ConfigurationFromEnv() *Configuration {
 		os.Getenv("DB_PASSWORD"),
 		os.Getenv("DB_NAME"),
 		os.Getenv("SSL_MODE"),
+		os.Getenv("OIDC_VALIDATION_URL"),
+		os.Getenv("JWT_SECRET"),
+		os.Getenv("MATRIX_SERVER_NAME"),
+		os.Getenv("UVS_AUTH_TOKEN"),
 	}
 
 	elements := reflect.ValueOf(&config).Elem()

@@ -6,6 +6,7 @@ require (
 	github.com/dariubs/gorm-jsonb v0.1.5
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/gorilla/mux v1.8.0
+	github.com/jarcoal/httpmock v1.2.0
 	github.com/lib/pq v1.10.7
 	github.com/pressly/goose/v3 v3.7.0
 	github.com/stretchr/testify v1.8.1

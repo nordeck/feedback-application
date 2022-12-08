@@ -24,6 +24,7 @@ import (
 	"feedback/internal/api"
 	"feedback/internal/repository"
 	gormjsonb "github.com/dariubs/gorm-jsonb"
+	"github.com/jarcoal/httpmock"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"net/http"
@@ -38,14 +39,20 @@ type RepositoryMock struct {
 }
 
 func (m *RepositoryMock) Store(value interface{}) error {
+	// mock
 	args := m.Called(value)
 	return args.Error(0)
 
 }
 
-func TestController_GetToken(t *testing.T) {
+func Test_ValidTokenToJwt(t *testing.T) {
 	repoMock := new(RepositoryMock)
-	controller := New(repoMock)
+
+	httpmock.Activate()
+	response := httpmock.NewStringResponder(200, "{\n  \"results\": {\n    \"user\": true\n  },\n  \"user_id\": \"@user:domain.tld\"\n}")
+	httpmock.RegisterResponder("POST", "https://some.url/verify/user", response)
+
+	controller := New(repoMock, nil)
 	request := httptest.NewRequest(http.MethodGet, "/token", nil)
 	request.Header.Set("authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJpbmNvbWluZyIsIm5hbWUiOiJKb2huIERvZSIsImlhdCI6MTUxNjIzOTAyMn0.0DoNIGqCNa1Tc41par4bzqnQWwlgsKCIP2mgUYEHemM")
 	responseWriter := httptest.NewRecorder()
@@ -54,21 +61,68 @@ func TestController_GetToken(t *testing.T) {
 
 	assert.Equal(t, 200, responseWriter.Result().StatusCode)
 	actual := responseWriter.Body.String()
-	expected := "\"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYmYiOjAsIm9pZGNUb2tlbiI6IiBleUpoYkdjaU9pSklVekkxTmlJc0luUjVjQ0k2SWtwWFZDSjkuZXlKemRXSWlPaUpwYm1OdmJXbHVaeUlzSW01aGJXVWlPaUpLYjJodUlFUnZaU0lzSW1saGRDSTZNVFV4TmpJek9UQXlNbjAuMERvTklHcUNOYTFUYzQxcGFyNGJ6cW5RV3dsZ3NLQ0lQMm1nVVlFSGVtTSJ9.udPK9mYoV5e2MnLMwerK6j55841eimKCdf1imGVYMxg\"\n"
-	assert.Equal(t, expected, actual, "not the same")
+	assert.True(t, strings.Contains(actual, "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."), "not the same")
 	repoMock.AssertExpectations(t)
 }
 
-func TestController_GetToken_emptyHeader(t *testing.T) {
+func Test_ValidTokenToJwtWithOptions(t *testing.T) {
 	repoMock := new(RepositoryMock)
-	controller := New(repoMock)
-	request := httptest.NewRequest(http.MethodGet, "/token", nil)
+
+	httpmock.Activate()
+	response := httpmock.NewStringResponder(200, "{\n  \"results\": {\n    \"user\": true\n  },\n  \"user_id\": \"@user:domain.tld\"\n}")
+	httpmock.RegisterResponder("POST", "https://some.url/verify/user", response)
+
+	controller := New(repoMock, nil)
+	request := httptest.NewRequest(http.MethodOptions, "/token", nil)
+	request.Header.Set("authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJpbmNvbWluZyIsIm5hbWUiOiJKb2huIERvZSIsImlhdCI6MTUxNjIzOTAyMn0.0DoNIGqCNa1Tc41par4bzqnQWwlgsKCIP2mgUYEHemM")
 	responseWriter := httptest.NewRecorder()
 
 	controller.GetRouter().ServeHTTP(responseWriter, request)
 
-	status := responseWriter.Result().StatusCode
-	assert.Equal(t, 500, status)
+	assert.Equal(t, 204, responseWriter.Result().StatusCode)
+	actual := responseWriter.Body.String()
+	assert.True(t, len(actual) == 0)
+	repoMock.AssertExpectations(t)
+}
+
+func Test_InvalidResponse(t *testing.T) {
+	repoMock := new(RepositoryMock)
+
+	httpmock.Activate()
+	response := httpmock.NewStringResponder(200, "{\n  \"results\": {\n    \"user\": false\n  },\n  \"user_id\": null\n}")
+	httpmock.RegisterResponder("POST", "https://some.url/verify/user", response)
+
+	controller := New(repoMock, nil)
+	request := httptest.NewRequest(http.MethodGet, "/token", nil)
+	request.Header.Set("authorization", "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJpbmNvbWluZyIsIm5hbWUiOiJKb2huIERvZSIsImlhdCI6MTUxNjIzOTAyMn0.0DoNIGqCNa1Tc41par4bzqnQWwlgsKCIP2mgUYEHemM")
+	responseWriter := httptest.NewRecorder()
+
+	controller.GetRouter().ServeHTTP(responseWriter, request)
+
+	assert.Equal(t, 400, responseWriter.Result().StatusCode)
+	actual := responseWriter.Body.String()
+	assert.True(t, strings.Contains(actual, "user is not valid\n"), "not the same")
+	repoMock.AssertExpectations(t)
+}
+
+func Test_InvalidToken(t *testing.T) {
+	repoMock := new(RepositoryMock)
+
+	httpmock.Activate()
+	response := httpmock.NewStringResponder(200, "{\n  \"results\": {\n    \"user\": true\n  },\n  \"user_id\": \"@user:domain.tld\"\n}")
+	httpmock.RegisterResponder("POST", "https://some.url/verify/user", response)
+
+	controller := New(repoMock, nil)
+	request := httptest.NewRequest(http.MethodGet, "/token", nil)
+	request.Header.Set("authorization", "Bearer ")
+	responseWriter := httptest.NewRecorder()
+
+	controller.GetRouter().ServeHTTP(responseWriter, request)
+
+	assert.Equal(t, 400, responseWriter.Result().StatusCode)
+	actual := responseWriter.Body.String()
+	assert.True(t, strings.Contains(actual, "authentication header value has not matched / is not a bearer token\n"), "not the same")
+	repoMock.AssertExpectations(t)
 }
 
 func TestController_CreateFeedback(t *testing.T) {
@@ -82,7 +136,7 @@ func TestController_CreateFeedback(t *testing.T) {
 		Metadata:      gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"},
 	}
 	repoMock.On("Store", expected).Return(nil)
-	controller := New(repoMock)
+	controller := New(repoMock, nil)
 
 	metadata := map[string]interface{}{
 		"first_key":  "first_value",
@@ -102,9 +156,34 @@ func TestController_CreateFeedback(t *testing.T) {
 	repoMock.AssertExpectations(t)
 }
 
+func TestController_CreateFeedbackWithOptions(t *testing.T) {
+	ratingComment := "any_comment"
+	rating := 3
+
+	repoMock := new(RepositoryMock)
+	controller := New(repoMock, nil)
+
+	metadata := map[string]interface{}{
+		"first_key":  "first_value",
+		"second_key": "second_value",
+	}
+
+	requestBody, _ := json.Marshal(&api.Feedback{
+		Rating:        rating,
+		RatingComment: ratingComment,
+		Metadata:      metadata,
+	})
+	request := httptest.NewRequest(http.MethodOptions, "/feedback", bytes.NewReader(requestBody))
+	responseWriter := httptest.NewRecorder()
+
+	controller.GetRouter().ServeHTTP(responseWriter, request)
+	assert.Equal(t, 204, responseWriter.Result().StatusCode)
+	assert.Equal(t, "GET,HEAD,PUT,PATCH,POST,DELETE", responseWriter.Result().Header.Get("Access-Control-Allow-Methods"))
+}
+
 func TestController_CreateFeedback_emptyBody(t *testing.T) {
 	repoMock := new(RepositoryMock)
-	controller := New(repoMock)
+	controller := New(repoMock, nil)
 
 	request := httptest.NewRequest(http.MethodPost, "/feedback", iotest.ErrReader(errors.New("error")))
 	responseWriter := httptest.NewRecorder()
@@ -118,7 +197,7 @@ func TestController_CreateFeedback_emptyBody(t *testing.T) {
 
 func TestController_CreateFeedback_invalidJson(t *testing.T) {
 	repoMock := new(RepositoryMock)
-	controller := New(repoMock)
+	controller := New(repoMock, nil)
 
 	request := httptest.NewRequest(http.MethodPost, "/feedback", strings.NewReader("broken"))
 	responseWriter := httptest.NewRecorder()
@@ -134,7 +213,7 @@ func TestController_CreateFeedback_databaseError(t *testing.T) {
 	repoMock := new(RepositoryMock)
 	repoMock.On("Store", mock.Anything).Return(errors.New("error"))
 
-	controller := New(repoMock)
+	controller := New(repoMock, nil)
 	requestBody, _ := json.Marshal(&repository.Feedback{
 		Rating:        1,
 		RatingComment: "any",

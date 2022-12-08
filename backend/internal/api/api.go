@@ -22,3 +22,10 @@ type Feedback struct {
 	RatingComment string
 	Metadata      map[string]interface{}
 }
+
+type ValidationResponse struct {
+	Results struct {
+		User bool `json:"user"`
+	} `json:"results"`
+	UserId string `json:"user_id"`
+}

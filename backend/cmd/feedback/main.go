@@ -19,6 +19,7 @@ package main
 
 import (
 	"feedback/internal"
+	"feedback/internal/auth"
 	"feedback/internal/controller"
 	"feedback/internal/logger"
 	"feedback/internal/repository"
@@ -30,9 +31,10 @@ var log = logger.Instance()
 func main() {
 	defer log.OnExit()
 	conf := internal.ConfigurationFromEnv()
+	authentication := auth.New(conf)
 	repo := repository.New(conf)
 	repo.Migrate()
-	httpController := controller.New(repo)
+	httpController := controller.New(repo, authentication)
 	router := httpController.GetRouter()
 	log.Info("Starting feedback backend.")
 	err := http.ListenAndServe(":8080", router)
