@@ -6,6 +6,7 @@ import (
 	"feedback/internal"
 	"feedback/internal/api"
 	"feedback/internal/client"
+	"feedback/internal/logger"
 	"github.com/golang-jwt/jwt"
 	"io"
 	"net/http"
@@ -17,6 +18,8 @@ import (
 type OidcAuthentication struct {
 	config *internal.Configuration
 }
+
+var log = logger.Instance()
 
 func New(config *internal.Configuration) *OidcAuthentication {
 	return &OidcAuthentication{config}
@@ -40,7 +43,8 @@ func (auth OidcAuthentication) IsAuthorized(request *http.Request) (bool, error)
 	if err != nil {
 		return false, err
 	}
-	parsedJwt, err := auth.parseJwt(err, tokenString)
+	sanitized := strings.Replace(*tokenString, "\"", "", -1)
+	parsedJwt, err := auth.parseJwt(err, &sanitized)
 	if err != nil {
 		return false, err
 	}
