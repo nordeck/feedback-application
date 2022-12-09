@@ -29,3 +29,6 @@ type ValidationResponse struct {
 	} `json:"results"`
 	UserId string `json:"user_id"`
 }
+type AuthenticationRequest struct {
+	TokenValue string `json:"token_value"`
+}
