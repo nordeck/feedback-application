@@ -162,6 +162,8 @@ func TestController_CreateFeedback_Authorized(t *testing.T) {
 
 	assert.Equal(t, 200, responseWriter.Result().StatusCode)
 	repoMock.AssertExpectations(t)
+	assert.Equal(t, "*", responseWriter.Result().Header.Get("Access-Control-Allow-Origin"))
+	assert.Equal(t, "*", responseWriter.Result().Header.Get("Access-Control-Allow-Headers"))
 }
 
 func TestController_CreateFeedback_Unauthorized_WrongSigningKey(t *testing.T) {
