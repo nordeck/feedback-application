@@ -6,6 +6,7 @@ import (
 	"feedback/internal"
 	"feedback/internal/api"
 	"feedback/internal/client"
+	"feedback/internal/logger"
 	"github.com/golang-jwt/jwt"
 	"io"
 	"net/http"
@@ -17,6 +18,8 @@ import (
 type OidcAuthentication struct {
 	config *internal.Configuration
 }
+
+var log = logger.Instance()
 
 func New(config *internal.Configuration) *OidcAuthentication {
 	return &OidcAuthentication{config}
@@ -33,6 +36,20 @@ func (auth OidcAuthentication) Validate(request *http.Request) (*string, error) 
 	} else {
 		return nil, errors.New("user is not valid")
 	}
+}
+
+func (auth OidcAuthentication) IsAuthorized(request *http.Request) (bool, error) {
+	tokenString, err := extractTokenFrom(request)
+	if err != nil {
+		return false, err
+	}
+	sanitized := strings.Replace(*tokenString, "\"", "", -1)
+	parsedJwt, err := auth.parseJwt(err, &sanitized)
+	if err != nil {
+		return false, err
+	}
+
+	return auth.validateJwt(parsedJwt, err)
 }
 
 func (auth OidcAuthentication) validate(request *http.Request) (*api.ValidationResponse, error) {
@@ -74,6 +91,37 @@ func extractTokenFrom(request *http.Request) (*string, error) {
 	}
 	err = errors.New("authentication header value has not matched / is not a bearer token")
 	return nil, err
+}
+
+func (auth OidcAuthentication) validateJwt(token *jwt.Token, err error) (bool, error) {
+	if token.Valid {
+		return true, err
+	} else if ve, ok := err.(*jwt.ValidationError); ok {
+		if ve.Errors&jwt.ValidationErrorMalformed != 0 {
+			err = errors.New("token malformed")
+			return false, err
+		} else if ve.Errors&(jwt.ValidationErrorExpired|jwt.ValidationErrorNotValidYet) != 0 {
+			err = errors.New("token is either expired or not active yet")
+			return false, err
+		} else {
+			err = errors.New("couldn't handle this token: " + err.Error())
+			return false, err
+		}
+	} else {
+		err = errors.New("couldn't handle this token: " + err.Error())
+		return false, err
+	}
+}
+
+func (auth OidcAuthentication) parseJwt(err error, tokenString *string) (*jwt.Token, error) {
+	token, err := jwt.ParseWithClaims(
+		*tokenString,
+		&jwt.StandardClaims{},
+		func(token *jwt.Token) (interface{}, error) {
+			return []byte(auth.config.JwtSecret), nil
+		},
+	)
+	return token, err
 }
 
 func mapFrom(respBody io.ReadCloser) (*api.ValidationResponse, error) {

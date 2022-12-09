@@ -55,6 +55,7 @@ func (c *Controller) GetRouter() http.Handler {
 }
 
 func (c *Controller) createToken(writer http.ResponseWriter, request *http.Request) {
+	addAccessControlHeaders(writer, request)
 	jwt, err := auth.New(internal.ConfigurationFromEnv()).Validate(request)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
@@ -69,6 +70,12 @@ func (c *Controller) createToken(writer http.ResponseWriter, request *http.Reque
 }
 
 func (c *Controller) createFeedback(writer http.ResponseWriter, request *http.Request) {
+	addAccessControlHeaders(writer, request)
+	authorized, err := auth.New(internal.ConfigurationFromEnv()).IsAuthorized(request)
+	if err != nil || !authorized {
+		http.Error(writer, err.Error(), http.StatusUnauthorized)
+		return
+	}
 	var feedback api.Feedback
 	body, err := io.ReadAll(request.Body)
 	if err != nil {
@@ -97,4 +104,9 @@ func (c *Controller) returnOptions(writer http.ResponseWriter, request *http.Req
 	writer.Header().Set("Access-Control-Allow-Methods", "GET,HEAD,PUT,PATCH,POST,DELETE")
 	writer.WriteHeader(http.StatusNoContent)
 	return
+}
+
+func addAccessControlHeaders(writer http.ResponseWriter, request *http.Request) {
+	writer.Header().Set("Access-Control-Allow-Origin", "*")
+	writer.Header().Set("Access-Control-Allow-Headers", "*")
 }

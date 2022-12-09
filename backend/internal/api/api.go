@@ -18,9 +18,9 @@
 package api
 
 type Feedback struct {
-	Rating        int
-	RatingComment string
-	Metadata      map[string]interface{}
+	Rating        int                    `json:"rating"`
+	RatingComment string                 `json:"rating_comment"`
+	Metadata      map[string]interface{} `json:"metadata"`
 }
 
 type ValidationResponse struct {
