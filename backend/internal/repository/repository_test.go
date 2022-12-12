@@ -72,23 +72,21 @@ func TestRepository_CRU_Roundtrip(t *testing.T) {
 
 	comment := "total doof"
 	rating := 3
-	metadata := map[string]interface{}{
-		"first_key":  "first_value",
-		"second_key": "second_value",
-	}
 
 	tokenValue := "someJwt"
 	anotherTokenValue := "anotherJwt"
+
 	feedback := Feedback{
 		Rating:        rating,
 		RatingComment: comment,
-		Metadata:      metadata,
+		Metadata:      gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"},
 		Jwt:           tokenValue,
 	}
+
 	feedback2 := Feedback{
 		Rating:        rating,
 		RatingComment: comment,
-		Metadata:      metadata,
+		Metadata:      gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"},
 		Jwt:           anotherTokenValue,
 	}
 	// CREATE
@@ -103,24 +101,32 @@ func TestRepository_CRU_Roundtrip(t *testing.T) {
 	assert.Equal(t, count, int64(2))
 
 	// READ
-	read, err := repo.Read(tokenValue)
-	assert.Equal(t, read.Rating, rating)
+	readBeforeUpdate, err := repo.Read(tokenValue)
+	assert.Equal(t, readBeforeUpdate.Rating, rating)
+	assert.Equal(t, readBeforeUpdate.RatingComment, comment)
+	assert.Equal(t, readBeforeUpdate.Metadata, gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"})
+	assert.Equal(t, readBeforeUpdate.Jwt, tokenValue)
 
 	feedbackToUpdate := Feedback{
 		Rating:        -1,
 		RatingComment: comment,
-		Metadata:      metadata,
+		Metadata:      gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"},
 		Jwt:           tokenValue,
 	}
 
 	// UPDATE
-	dbFeedback, err := repo.Update(feedbackToUpdate, tokenValue)
+	_, err = repo.Update(feedbackToUpdate, tokenValue)
+	if err != nil {
+		panic(err)
+	}
 
-	assert.Equal(t, dbFeedback.Rating, -1)
-	assert.Equal(t, dbFeedback.RatingComment, comment)
-	assert.NotNil(t, dbFeedback.CreatedAt)
-	assert.Equal(t, dbFeedback.Metadata, gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"})
-	assert.Equal(t, dbFeedback.Jwt, tokenValue)
+	// READ
+	readAfterUpdate, err := repo.Read(tokenValue)
+	assert.Equal(t, readAfterUpdate.Rating, -1)
+	assert.Equal(t, readAfterUpdate.RatingComment, comment)
+	assert.NotNil(t, readAfterUpdate.CreatedAt)
+	assert.Equal(t, readAfterUpdate.Metadata, gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"})
+	assert.Equal(t, readAfterUpdate.Jwt, tokenValue)
 
 	countAfter := repo.Count()
 	assert.Equal(t, countAfter, int64(2))
