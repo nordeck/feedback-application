@@ -100,7 +100,7 @@ func (repo *Repository) Update(feedbackToUpdate Feedback, tokenValue string) (Fe
 	repo.db.Model(fromDatabase).Update("rating", feedbackToUpdate.Rating)
 	repo.db.Model(fromDatabase).Update("rating_comment", feedbackToUpdate.RatingComment)
 	repo.db.Model(fromDatabase).Update("metadata", feedbackToUpdate.Metadata)
-	return feedbackToUpdate, nil
+	return repo.Read(tokenValue)
 }
 
 func (repo *Repository) checkIfFeedbackExists(tokenValue string) bool {

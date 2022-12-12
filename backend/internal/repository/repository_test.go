@@ -110,7 +110,7 @@ func TestRepository_CRU_Roundtrip(t *testing.T) {
 		Rating:        -1,
 		RatingComment: comment,
 		Metadata:      metadata,
-		Jwt:           "bla",
+		Jwt:           tokenValue,
 	}
 
 	// UPDATE
@@ -120,7 +120,7 @@ func TestRepository_CRU_Roundtrip(t *testing.T) {
 	assert.Equal(t, dbFeedback.RatingComment, comment)
 	assert.NotNil(t, dbFeedback.CreatedAt)
 	assert.Equal(t, dbFeedback.Metadata, gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"})
-	assert.Equal(t, dbFeedback.Jwt, "bla")
+	assert.Equal(t, dbFeedback.Jwt, tokenValue)
 
 	countAfter := repo.Count()
 	assert.Equal(t, countAfter, int64(2))
