@@ -77,23 +77,25 @@ func (repo *Repository) Store(value interface{}) error {
 }
 
 func (repo *Repository) Read(tokenValue string) (Feedback, error) {
-	if repo.checkIfFeedbackExists(tokenValue) == false {
-		return Feedback{}, errors.New("token not found")
-	}
 	var feedback = Feedback{}
 	repo.db.Find(&feedback, "Jwt = ?", tokenValue)
-
+	if feedback.Jwt == "" {
+		return feedback, errors.New("no record with token value not found in database")
+	}
 	return feedback, nil
 }
 
 func (repo *Repository) Update(feedbackToUpdate Feedback, tokenValue string) (Feedback, error) {
 	if repo.checkIfFeedbackExists(tokenValue) == false {
-		return Feedback{}, errors.New("token not found")
+		return Feedback{}, errors.New("no record found to get updated")
 	}
+
 	read, _ := repo.Read(tokenValue)
+
 	read.Rating = feedbackToUpdate.Rating
 	read.RatingComment = feedbackToUpdate.RatingComment
 	read.Metadata = feedbackToUpdate.Metadata
+
 	repo.db.Save(&read)
 	return feedbackToUpdate, nil
 }

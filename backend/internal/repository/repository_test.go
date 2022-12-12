@@ -19,6 +19,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"feedback/internal"
 	gormjsonb "github.com/dariubs/gorm-jsonb"
 	"github.com/stretchr/testify/assert"
@@ -77,6 +78,7 @@ func TestRepository_CRU_Roundtrip(t *testing.T) {
 	}
 
 	tokenValue := "someJwt"
+	anotherTokenValue := "anotherJwt"
 	feedback := Feedback{
 		Rating:        rating,
 		RatingComment: comment,
@@ -87,12 +89,13 @@ func TestRepository_CRU_Roundtrip(t *testing.T) {
 		Rating:        rating,
 		RatingComment: comment,
 		Metadata:      metadata,
-		Jwt:           tokenValue,
+		Jwt:           anotherTokenValue,
 	}
 	// CREATE
 	err := repo.Store(&feedback)
-	repo.Store(&feedback2)
-	if err != nil {
+	err2 := repo.Store(&feedback2)
+
+	if err != nil || err2 != nil {
 		panic(err)
 	}
 
@@ -122,4 +125,48 @@ func TestRepository_CRU_Roundtrip(t *testing.T) {
 	countAfter := repo.Count()
 	assert.Equal(t, countAfter, int64(2))
 
+}
+
+func TestRepository_CRU_Roundtrip_Read_TokenValueNotFound(t *testing.T) {
+	conf := internal.ConfigurationFromEnv()
+	repo := New(conf)
+	repo.Migrate()
+
+	// READ
+	_, err := repo.Read("tokenValNotAvailable")
+
+	if err == nil {
+		// no error occurred, this should not happen.
+		panic(err)
+	}
+	assert.Equal(t, err, errors.New("no record with token value not found in database"))
+}
+
+func TestRepository_CRU_Roundtrip_Update_TokenValueNotFound(t *testing.T) {
+	conf := internal.ConfigurationFromEnv()
+	repo := New(conf)
+	repo.Migrate()
+
+	comment := "total doof"
+	rating := 3
+	metadata := map[string]interface{}{
+		"first_key":  "first_value",
+		"second_key": "second_value",
+	}
+
+	feedbackToUpdate := Feedback{
+		Rating:        rating,
+		RatingComment: comment,
+		Metadata:      metadata,
+		Jwt:           "bla",
+	}
+
+	// READ
+	_, err := repo.Update(feedbackToUpdate, "tokenValNotAvailable")
+
+	if err == nil {
+		// no error occurred, this should not happen.
+		panic(err)
+	}
+	assert.Equal(t, err, errors.New("no record found to get updated"))
 }
