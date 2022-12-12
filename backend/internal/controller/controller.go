@@ -71,7 +71,9 @@ func (c *Controller) createToken(writer http.ResponseWriter, request *http.Reque
 
 func (c *Controller) createFeedback(writer http.ResponseWriter, request *http.Request) {
 	addAccessControlHeaders(writer, request)
+
 	authentication := auth.New(internal.ConfigurationFromEnv())
+
 	tokenString, err := authentication.ExtractTokenFrom(request)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusUnauthorized)
