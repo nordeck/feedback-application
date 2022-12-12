@@ -95,9 +95,9 @@ func (c *Controller) createFeedback(writer http.ResponseWriter, request *http.Re
 		return
 	}
 
-	read, err := c.repo.Read(*tokenString)
-	if read.Jwt == *tokenString {
-		_, err := c.repo.Update(read, *tokenString)
+	fromDatabase, err := c.repo.Read(*tokenString)
+	if fromDatabase.Jwt == *tokenString {
+		_, err := c.repo.Update(fromDatabase, *tokenString)
 		if err == nil {
 			return
 		} else {

@@ -90,13 +90,13 @@ func (repo *Repository) Update(feedbackToUpdate Feedback, tokenValue string) (Fe
 		return Feedback{}, errors.New("no record found to get updated")
 	}
 
-	read, _ := repo.Read(tokenValue)
+	fromDatabase, _ := repo.Read(tokenValue)
 
-	read.Rating = feedbackToUpdate.Rating
-	read.RatingComment = feedbackToUpdate.RatingComment
-	read.Metadata = feedbackToUpdate.Metadata
+	fromDatabase.Rating = feedbackToUpdate.Rating
+	fromDatabase.RatingComment = feedbackToUpdate.RatingComment
+	fromDatabase.Metadata = feedbackToUpdate.Metadata
 
-	repo.db.Save(&read)
+	repo.db.Save(&fromDatabase)
 	return feedbackToUpdate, nil
 }
 
