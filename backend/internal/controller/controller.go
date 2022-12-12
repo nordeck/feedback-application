@@ -71,7 +71,13 @@ func (c *Controller) createToken(writer http.ResponseWriter, request *http.Reque
 
 func (c *Controller) createFeedback(writer http.ResponseWriter, request *http.Request) {
 	addAccessControlHeaders(writer, request)
-	authorized, err := auth.New(internal.ConfigurationFromEnv()).IsAuthorized(request)
+	authentication := auth.New(internal.ConfigurationFromEnv())
+	tokenString, err := authentication.ExtractTokenFrom(request)
+	if err != nil {
+		http.Error(writer, err.Error(), http.StatusUnauthorized)
+		return
+	}
+	authorized, err := authentication.IsAuthorized(tokenString)
 	if err != nil || !authorized {
 		http.Error(writer, err.Error(), http.StatusUnauthorized)
 		return
@@ -89,7 +95,7 @@ func (c *Controller) createFeedback(writer http.ResponseWriter, request *http.Re
 		return
 	}
 
-	err = c.repo.Store(repository.MapToFeedbackModel(feedback))
+	err = c.repo.Store(repository.MapToFeedbackModel(feedback, *tokenString))
 
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusInternalServerError)

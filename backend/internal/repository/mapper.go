@@ -21,15 +21,15 @@ import (
 	"feedback/internal/api"
 )
 
-func MapToFeedbackModel(feedback api.Feedback) *Feedback {
+func MapToFeedbackModel(feedback api.Feedback, tokenValue string) *Feedback {
 	var dbFeedback Feedback
 	dbFeedback.RatingComment = feedback.RatingComment
 	dbFeedback.Rating = feedback.Rating
-
 	dbFeedback.Metadata = make(map[string]interface{}, len(feedback.Metadata))
 	for key, value := range feedback.Metadata {
 		dbFeedback.Metadata[key] = value
 	}
+	dbFeedback.Jwt = tokenValue
 
 	return &dbFeedback
 }

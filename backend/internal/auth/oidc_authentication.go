@@ -6,7 +6,6 @@ import (
 	"feedback/internal"
 	"feedback/internal/api"
 	"feedback/internal/client"
-	"feedback/internal/logger"
 	"github.com/golang-jwt/jwt"
 	"io"
 	"net/http"
@@ -18,8 +17,6 @@ import (
 type OidcAuthentication struct {
 	config *internal.Configuration
 }
-
-var log = logger.Instance()
 
 func New(config *internal.Configuration) *OidcAuthentication {
 	return &OidcAuthentication{config}
@@ -38,13 +35,9 @@ func (auth OidcAuthentication) Validate(request *http.Request) (*string, error) 
 	}
 }
 
-func (auth OidcAuthentication) IsAuthorized(request *http.Request) (bool, error) {
-	tokenString, err := extractTokenFrom(request)
-	if err != nil {
-		return false, err
-	}
+func (auth OidcAuthentication) IsAuthorized(tokenString *string) (bool, error) {
 	sanitized := strings.Replace(*tokenString, "\"", "", -1)
-	parsedJwt, err := auth.parseJwt(err, &sanitized)
+	parsedJwt, err := auth.parseJwt(&sanitized)
 	if err != nil {
 		return false, err
 	}
@@ -67,7 +60,7 @@ func (auth OidcAuthentication) validate(request *http.Request) (*api.ValidationR
 }
 
 func (auth OidcAuthentication) createValidationRequestFrom(request *http.Request) ([]byte, error) {
-	token, err := extractTokenFrom(request)
+	token, err := auth.ExtractTokenFrom(request)
 	if err != nil || token == nil {
 		return nil, err
 	}
@@ -81,7 +74,7 @@ func (auth OidcAuthentication) createValidationRequestFrom(request *http.Request
 	return requestBody, err
 }
 
-func extractTokenFrom(request *http.Request) (*string, error) {
+func (auth OidcAuthentication) ExtractTokenFrom(request *http.Request) (*string, error) {
 	authHeaderValue := request.Header.Get("authorization")
 	var bearerRegExp = "^Bearer\\s+(.+)$"
 
@@ -113,7 +106,7 @@ func (auth OidcAuthentication) validateJwt(token *jwt.Token, err error) (bool, e
 	}
 }
 
-func (auth OidcAuthentication) parseJwt(err error, tokenString *string) (*jwt.Token, error) {
+func (auth OidcAuthentication) parseJwt(tokenString *string) (*jwt.Token, error) {
 	token, err := jwt.ParseWithClaims(
 		*tokenString,
 		&jwt.StandardClaims{},
