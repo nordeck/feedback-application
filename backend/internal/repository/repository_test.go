@@ -53,7 +53,10 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 
-	os.Setenv("DB_PORT", port.Port())
+	err = os.Setenv("DB_PORT", port.Port())
+	if err != nil {
+		panic(err)
+	}
 
 	code := m.Run()
 
@@ -145,7 +148,7 @@ func TestRepository_CRU_Roundtrip_Read_TokenValueNotFound(t *testing.T) {
 		// no error occurred, this should not happen.
 		panic(err)
 	}
-	assert.Equal(t, err, errors.New("no record with token value not found in database"))
+	assert.Equal(t, err, errors.New("no record with token value found in database"))
 }
 
 func TestRepository_CRU_Roundtrip_Update_TokenValueNotFound(t *testing.T) {
@@ -174,5 +177,5 @@ func TestRepository_CRU_Roundtrip_Update_TokenValueNotFound(t *testing.T) {
 		// no error occurred, this should not happen.
 		panic(err)
 	}
-	assert.Equal(t, err, errors.New("no record found to get updated"))
+	assert.Equal(t, err, errors.New("no record found for update"))
 }

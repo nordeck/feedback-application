@@ -25,11 +25,11 @@ import (
 	_ "github.com/lib/pq"
 	"github.com/pressly/goose/v3"
 	"gorm.io/gorm"
+	"log"
 )
 
 //go:embed migrations/*.sql
 var migrations embed.FS
-var log = logger.Instance()
 
 type Interface interface {
 	Store(value interface{}) error
@@ -70,7 +70,6 @@ func (repo *Repository) Migrate() {
 }
 
 func (repo *Repository) Store(value interface{}) error {
-	log.Info("storing feedback")
 	tx := repo.db.Create(value)
 	tx.Commit()
 
@@ -79,24 +78,21 @@ func (repo *Repository) Store(value interface{}) error {
 
 func (repo *Repository) Read(tokenValue string) (Feedback, error) {
 	var feedback = Feedback{}
-	log.Info("reading from database")
 	repo.db.Find(&feedback, "Jwt = ?", tokenValue)
 	if feedback.Jwt == "" {
-		return feedback, errors.New("no record with token value not found in database")
+		return feedback, errors.New("no record with token value found in database")
 	}
-	log.Info("feedback found for token " + feedback.Jwt)
 	return feedback, nil
 }
 
 func (repo *Repository) Update(feedbackToUpdate Feedback, tokenValue string) (Feedback, error) {
 
 	if repo.checkIfFeedbackExists(tokenValue) == false {
-		return Feedback{}, errors.New("no record found to get updated")
+		return Feedback{}, errors.New("no record found for update")
 	}
 
 	fromDatabase, _ := repo.Read(tokenValue)
 
-	log.Info("record found, updating values")
 	repo.db.Model(fromDatabase).Update("rating", feedbackToUpdate.Rating)
 	repo.db.Model(fromDatabase).Update("rating_comment", feedbackToUpdate.RatingComment)
 	repo.db.Model(fromDatabase).Update("metadata", feedbackToUpdate.Metadata)
@@ -104,7 +100,6 @@ func (repo *Repository) Update(feedbackToUpdate Feedback, tokenValue string) (Fe
 }
 
 func (repo *Repository) checkIfFeedbackExists(tokenValue string) bool {
-	log.Info("feedback exists")
 	var feedback = &Feedback{}
 	repo.db.Find(&feedback, "Jwt = ?", tokenValue)
 	if feedback.ID == 0 {

@@ -42,7 +42,7 @@ type RepositoryMock struct {
 
 func (m *RepositoryMock) Read(tokenValue string) (repository.Feedback, error) {
 	feedback := repository.Feedback{
-		BaseModel:     repository.BaseModel{uint(0), time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC)},
+		BaseModel:     repository.BaseModel{ID: uint(0), CreatedAt: time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC)},
 		Rating:        3,
 		RatingComment: "any_comment",
 		Metadata:      gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"},
@@ -159,7 +159,7 @@ func TestController_CreateFeedback_Authorized(t *testing.T) {
 	}
 
 	feedback := repository.Feedback{
-		BaseModel:     repository.BaseModel{uint(0), time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC)},
+		BaseModel:     repository.BaseModel{ID: uint(0), CreatedAt: time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC)},
 		Rating:        3,
 		RatingComment: "any_comment",
 		Metadata:      gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"},
@@ -210,7 +210,7 @@ func TestController_UpdateFeedback_Authorized(t *testing.T) {
 	}
 
 	feedback := repository.Feedback{
-		BaseModel:     repository.BaseModel{uint(0), time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC)},
+		BaseModel:     repository.BaseModel{ID: uint(0), CreatedAt: time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC)},
 		Rating:        3,
 		RatingComment: "any_comment",
 		Metadata:      gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"},
@@ -373,7 +373,7 @@ func TestController_CreateFeedback_databaseError(t *testing.T) {
 	repoMock := new(RepositoryMock)
 
 	feedback := repository.Feedback{
-		BaseModel:     repository.BaseModel{uint(0), time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC)},
+		BaseModel:     repository.BaseModel{ID: uint(0), CreatedAt: time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC)},
 		Rating:        3,
 		RatingComment: "any_comment",
 		Metadata:      gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"},
