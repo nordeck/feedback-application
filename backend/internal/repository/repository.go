@@ -19,6 +19,7 @@ package repository
 
 import (
 	"embed"
+	"errors"
 	"feedback/internal"
 	"feedback/internal/logger"
 	_ "github.com/lib/pq"
@@ -32,6 +33,8 @@ var log = logger.Instance()
 
 type Interface interface {
 	Store(value interface{}) error
+	Read(tokenValue string) (Feedback, error)
+	Update(feedbackToUpdate Feedback, tokenValue string) (Feedback, error)
 }
 
 type Repository struct {
@@ -71,4 +74,41 @@ func (repo *Repository) Store(value interface{}) error {
 	tx.Commit()
 
 	return repo.db.Error
+}
+
+func (repo *Repository) Read(tokenValue string) (Feedback, error) {
+	if repo.checkIfFeedbackExists(tokenValue) == false {
+		return Feedback{}, errors.New("token not found")
+	}
+	var feedback = Feedback{}
+	repo.db.Find(&feedback, "Jwt = ?", tokenValue)
+
+	return feedback, nil
+}
+
+func (repo *Repository) Update(feedbackToUpdate Feedback, tokenValue string) (Feedback, error) {
+	if repo.checkIfFeedbackExists(tokenValue) == false {
+		return Feedback{}, errors.New("token not found")
+	}
+	read, _ := repo.Read(tokenValue)
+	read.Rating = feedbackToUpdate.Rating
+	read.RatingComment = feedbackToUpdate.RatingComment
+	read.Metadata = feedbackToUpdate.Metadata
+	repo.db.Save(&read)
+	return feedbackToUpdate, nil
+}
+
+func (repo *Repository) checkIfFeedbackExists(tokenValue string) bool {
+	var feedback = &Feedback{}
+	repo.db.Find(&feedback, "Jwt = ?", tokenValue)
+	if feedback.ID == 0 {
+		return false
+	}
+	return true
+}
+
+func (repo *Repository) Count() int64 {
+	var count int64
+	repo.db.Table("feedbacks").Count(&count)
+	return count
 }

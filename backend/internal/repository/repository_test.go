@@ -64,7 +64,7 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func TestRepository_Store(t *testing.T) {
+func TestRepository_CRU_Roundtrip(t *testing.T) {
 	conf := internal.ConfigurationFromEnv()
 	repo := New(conf)
 	repo.Migrate()
@@ -76,22 +76,50 @@ func TestRepository_Store(t *testing.T) {
 		"second_key": "second_value",
 	}
 
+	tokenValue := "someJwt"
 	feedback := Feedback{
 		Rating:        rating,
 		RatingComment: comment,
 		Metadata:      metadata,
+		Jwt:           tokenValue,
 	}
+	feedback2 := Feedback{
+		Rating:        rating,
+		RatingComment: comment,
+		Metadata:      metadata,
+		Jwt:           tokenValue,
+	}
+	// CREATE
 	err := repo.Store(&feedback)
+	repo.Store(&feedback2)
 	if err != nil {
 		panic(err)
 	}
 
-	dbFeedback := Feedback{}
-	repo.db.Find(&dbFeedback)
+	count := repo.Count()
+	assert.Equal(t, count, int64(2))
 
-	assert.Equal(t, dbFeedback.ID, uint(1))
-	assert.Equal(t, dbFeedback.Rating, rating)
+	// READ
+	read, err := repo.Read(tokenValue)
+	assert.Equal(t, read.Rating, rating)
+
+	feedbackToUpdate := Feedback{
+		Rating:        -1,
+		RatingComment: comment,
+		Metadata:      metadata,
+		Jwt:           "bla",
+	}
+
+	// UPDATE
+	dbFeedback, err := repo.Update(feedbackToUpdate, tokenValue)
+
+	assert.Equal(t, dbFeedback.Rating, -1)
 	assert.Equal(t, dbFeedback.RatingComment, comment)
 	assert.NotNil(t, dbFeedback.CreatedAt)
 	assert.Equal(t, dbFeedback.Metadata, gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"})
+	assert.Equal(t, dbFeedback.Jwt, "bla")
+
+	countAfter := repo.Count()
+	assert.Equal(t, countAfter, int64(2))
+
 }

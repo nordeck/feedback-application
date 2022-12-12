@@ -95,6 +95,17 @@ func (c *Controller) createFeedback(writer http.ResponseWriter, request *http.Re
 		return
 	}
 
+	read, err := c.repo.Read(*tokenString)
+	if read.Jwt == *tokenString {
+		_, err := c.repo.Update(read, *tokenString)
+		if err == nil {
+			return
+		} else {
+			http.Error(writer, err.Error(), http.StatusInternalServerError)
+			log.Debug(err)
+			return
+		}
+	}
 	err = c.repo.Store(repository.MapToFeedbackModel(feedback, *tokenString))
 
 	if err != nil {
