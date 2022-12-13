@@ -9,5 +9,7 @@ create table feedbacks
     jwt            varchar(512)
 );
 
+CREATE INDEX idx_feedbacks_jwt ON feedbacks(jwt);
+
 -- +goose Down
 drop table feedbacks;
