@@ -62,7 +62,8 @@ func (c *Controller) createToken(writer http.ResponseWriter, request *http.Reque
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 		return
 	}
-	err = json.NewEncoder(writer).Encode(jwt)
+	writer.Header().Set("Content-Type", "text/plain")
+	_, err = writer.Write([]byte(*jwt))
 
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusInternalServerError)

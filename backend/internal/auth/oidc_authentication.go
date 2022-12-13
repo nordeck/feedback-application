@@ -53,8 +53,7 @@ func (auth OidcAuthentication) Validate(request *http.Request) (*string, error) 
 }
 
 func (auth OidcAuthentication) IsAuthorized(tokenString *string) (bool, error) {
-	sanitized := strings.Replace(*tokenString, "\"", "", -1)
-	parsedJwt, err := auth.parseJwt(&sanitized)
+	parsedJwt, err := auth.parseJwt(tokenString)
 	if err != nil {
 		return false, err
 	}
