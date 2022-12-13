@@ -98,17 +98,17 @@ func (c *Controller) createFeedback(writer http.ResponseWriter, request *http.Re
 
 func (c *Controller) createOrUpdate(tokenString *string, feedback api.Feedback) error {
 	fromDatabase, err := c.repo.FindByToken(*tokenString)
-	if err != nil {
-		return err
-	}
-	if fromDatabase.Jwt == *tokenString {
-		log.Debug("token found in database, updating values")
-		feedbackToUpdateModel := *repository.MapToFeedbackModel(feedback, *tokenString)
-		_, err := c.repo.Update(feedbackToUpdateModel)
-		if err != nil {
-			return errors.New("update of values failed")
-		} else {
-			return nil
+	if err == nil {
+
+		if fromDatabase.Jwt == *tokenString {
+			log.Debug("token found in database, updating values")
+			feedbackToUpdateModel := *repository.MapToFeedbackModel(feedback, *tokenString)
+			_, err := c.repo.Update(feedbackToUpdateModel)
+			if err != nil {
+				return errors.New("update of values failed")
+			} else {
+				return nil
+			}
 		}
 	}
 	return c.repo.Store(repository.MapToFeedbackModel(feedback, *tokenString))
