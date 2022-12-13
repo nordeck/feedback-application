@@ -24,16 +24,16 @@ import (
 )
 
 type Configuration struct {
-	DbHost            string `json:"db_host,omitempty"`             // DB_HOST
-	DbPort            string `json:"db_port,omitempty"`             // DB_PORT
-	DbUser            string `json:"db_user,omitempty"`             // DB_USER
-	DbPassword        string `json:"db_password,omitempty"`         // DB_PASSWORD
-	DbName            string `json:"db_name,omitempty"`             // DB_NAME
-	Sslmode           string `json:"sslmode,disable"`               // SSL_MODE
-	OidcValidationUrl string `json:"oidc_validation_url,omitempty"` // OIDC_VALIDATION_URL
-	JwtSecret         string `json:"jwt_secret,omitempty"`          // JWT_SECRET
-	MatrixServerName  string `json:"matrix_server_name,omitempty"`  // MATRIX_SERVER_NAME
-	UvsAuthToken      string `json:"uvs_auth_token,omitempty"`      // UVS_AUTH_TOKEN
+	DbHost            string `json:"db_host,localhost"`                                  // DB_HOST
+	DbPort            string `json:"db_port,5432"`                                       // DB_PORT
+	DbUser            string `json:"db_user,postgres"`                                   // DB_USER
+	DbPassword        string `json:"db_password,postgres"`                               // DB_PASSWORD
+	DbName            string `json:"db_name,postgres"`                                   // DB_NAME
+	Sslmode           string `json:"sslmode,disable"`                                    // SSL_MODE
+	OidcValidationUrl string `json:"oidc_validation_url,'https://some.url/verify/user'"` // OIDC_VALIDATION_URL
+	JwtSecret         string `json:"jwt_secret,someArbitraryString"`                     // JWT_SECRET
+	MatrixServerName  string `json:"matrix_server_name,'domain.tld'"`                    // MATRIX_SERVER_NAME
+	UvsAuthToken      string `json:"uvs_auth_token,someArbitraryString"`                 // UVS_AUTH_TOKEN
 }
 
 func ConfigurationFromEnv() *Configuration {

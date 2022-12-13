@@ -104,7 +104,7 @@ func TestRepository_CRU_Roundtrip(t *testing.T) {
 	assert.Equal(t, count, int64(2))
 
 	// READ
-	readBeforeUpdate, err := repo.Read(tokenValue)
+	readBeforeUpdate, err := repo.FindByToken(tokenValue)
 	assert.Equal(t, readBeforeUpdate.Rating, rating)
 	assert.Equal(t, readBeforeUpdate.RatingComment, comment)
 	assert.Equal(t, readBeforeUpdate.Metadata, gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"})
@@ -118,13 +118,13 @@ func TestRepository_CRU_Roundtrip(t *testing.T) {
 	}
 
 	// UPDATE
-	_, err = repo.Update(feedbackToUpdate, tokenValue)
+	_, err = repo.Update(feedbackToUpdate)
 	if err != nil {
 		panic(err)
 	}
 
 	// READ
-	readAfterUpdate, err := repo.Read(tokenValue)
+	readAfterUpdate, err := repo.FindByToken(tokenValue)
 	assert.Equal(t, readAfterUpdate.Rating, -1)
 	assert.Equal(t, readAfterUpdate.RatingComment, comment)
 	assert.NotNil(t, readAfterUpdate.CreatedAt)
@@ -142,7 +142,7 @@ func TestRepository_CRU_Roundtrip_Read_TokenValueNotFound(t *testing.T) {
 	repo.Migrate()
 
 	// READ
-	_, err := repo.Read("tokenValNotAvailable")
+	_, err := repo.FindByToken("tokenValNotAvailable")
 
 	if err == nil {
 		// no error occurred, this should not happen.
@@ -167,11 +167,11 @@ func TestRepository_CRU_Roundtrip_Update_TokenValueNotFound(t *testing.T) {
 		Rating:        rating,
 		RatingComment: comment,
 		Metadata:      metadata,
-		Jwt:           "bla",
+		Jwt:           "tokenValNotAvailable",
 	}
 
 	// READ
-	_, err := repo.Update(feedbackToUpdate, "tokenValNotAvailable")
+	_, err := repo.Update(feedbackToUpdate)
 
 	if err == nil {
 		// no error occurred, this should not happen.

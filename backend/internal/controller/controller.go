@@ -19,6 +19,7 @@ package controller
 
 import (
 	"encoding/json"
+	"errors"
 	"feedback/internal"
 	"feedback/internal/api"
 	"feedback/internal/auth"
@@ -71,50 +72,62 @@ func (c *Controller) createToken(writer http.ResponseWriter, request *http.Reque
 
 func (c *Controller) createFeedback(writer http.ResponseWriter, request *http.Request) {
 	addAccessControlHeaders(writer)
-
 	authentication := auth.New(internal.ConfigurationFromEnv())
 
-	tokenString, err := authentication.ExtractTokenFrom(request)
-	if err != nil {
-		http.Error(writer, err.Error(), http.StatusUnauthorized)
-		return
-	}
-	authorized, err := authentication.IsAuthorized(tokenString)
+	tokenString, err, authorized := c.authenticate(authentication, request)
 	if err != nil || !authorized {
 		http.Error(writer, err.Error(), http.StatusUnauthorized)
+		log.Debug(err)
 		return
 	}
-	var feedback api.Feedback
-	body, err := io.ReadAll(request.Body)
-	if err != nil {
-		http.Error(writer, err.Error(), http.StatusBadRequest)
-		return
-	}
-	err = json.Unmarshal(body, &feedback)
+
+	feedback, err := c.parseFeedback(err, request)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusBadRequest)
 		log.Debug(err)
 		return
 	}
 
-	fromDatabase, err := c.repo.Read(*tokenString)
-	if fromDatabase.Jwt == *tokenString {
-		_, err := c.repo.Update(*repository.MapToFeedbackModel(feedback, *tokenString), *tokenString)
-		if err == nil {
-			return
-		} else {
-			http.Error(writer, err.Error(), http.StatusInternalServerError)
-			log.Debug(err)
-			return
-		}
-	}
-	err = c.repo.Store(repository.MapToFeedbackModel(feedback, *tokenString))
-
+	err = c.createOrUpdate(tokenString, feedback)
 	if err != nil {
 		http.Error(writer, err.Error(), http.StatusInternalServerError)
 		log.Debug(err)
 		return
 	}
+}
+
+func (c *Controller) createOrUpdate(tokenString *string, feedback api.Feedback) error {
+	fromDatabase, err := c.repo.FindByToken(*tokenString)
+	if err != nil {
+		return err
+	}
+	if fromDatabase.Jwt == *tokenString {
+		log.Debug("token found in database, updating values")
+		feedbackToUpdateModel := *repository.MapToFeedbackModel(feedback, *tokenString)
+		_, err := c.repo.Update(feedbackToUpdateModel)
+		if err != nil {
+			return errors.New("update of values failed")
+		} else {
+			return nil
+		}
+	}
+	return c.repo.Store(repository.MapToFeedbackModel(feedback, *tokenString))
+}
+
+func (c *Controller) authenticate(authentication *auth.OidcAuthentication, request *http.Request) (*string, error, bool) {
+	tokenString, err := authentication.ExtractTokenFrom(request)
+	if err != nil {
+		return nil, err, false
+	}
+	authorized, err := authentication.IsAuthorized(tokenString)
+	return tokenString, err, authorized
+}
+
+func (c *Controller) parseFeedback(err error, request *http.Request) (api.Feedback, error) {
+	var feedback api.Feedback
+	body, err := io.ReadAll(request.Body)
+	err = json.Unmarshal(body, &feedback)
+	return feedback, err
 }
 
 func (c *Controller) returnOptions(writer http.ResponseWriter, request *http.Request) {

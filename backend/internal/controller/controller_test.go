@@ -40,7 +40,7 @@ type RepositoryMock struct {
 	mock.Mock
 }
 
-func (m *RepositoryMock) Read(tokenValue string) (repository.Feedback, error) {
+func (m *RepositoryMock) FindByToken(tokenValue string) (repository.Feedback, error) {
 	feedback := repository.Feedback{
 		BaseModel:     repository.BaseModel{ID: uint(0), CreatedAt: time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC)},
 		Rating:        3,
@@ -52,8 +52,8 @@ func (m *RepositoryMock) Read(tokenValue string) (repository.Feedback, error) {
 	return repository.Feedback{}, args.Error(0)
 }
 
-func (m *RepositoryMock) Update(feedbackToUpdate repository.Feedback, tokenValue string) (repository.Feedback, error) {
-	args := m.Called(feedbackToUpdate, tokenValue)
+func (m *RepositoryMock) Update(feedbackToUpdate repository.Feedback) (repository.Feedback, error) {
+	args := m.Called(feedbackToUpdate)
 	return repository.Feedback{}, args.Error(0)
 }
 
@@ -166,7 +166,7 @@ func TestController_CreateFeedback_Authorized(t *testing.T) {
 		Jwt:           "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.Z-0V0WjFAQpqLLynDdrYLZIDxzPs-nCVHNxFutGeZIs",
 	}
 	repoMock.On("Store", expected).Return(nil)
-	repoMock.On("Read", feedback).Return(nil)
+	repoMock.On("FindByToken", feedback).Return(nil)
 	controller := New(repoMock, nil)
 
 	metadata := map[string]interface{}{
@@ -218,7 +218,7 @@ func TestController_UpdateFeedback_Authorized(t *testing.T) {
 	}
 
 	repoMock.On("Store", expected).Return(nil)
-	repoMock.On("Read", feedback).Return(nil)
+	repoMock.On("FindByToken", feedback).Return(nil)
 	controller := New(repoMock, nil)
 
 	metadata := map[string]interface{}{
@@ -379,7 +379,7 @@ func TestController_CreateFeedback_databaseError(t *testing.T) {
 		Metadata:      gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"},
 		Jwt:           "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.Z-0V0WjFAQpqLLynDdrYLZIDxzPs-nCVHNxFutGeZIs",
 	}
-	repoMock.On("Read", feedback).Return(nil)
+	repoMock.On("FindByToken", feedback).Return(nil)
 	repoMock.On("Store", mock.Anything).Return(errors.New("error"))
 
 	controller := New(repoMock, nil)

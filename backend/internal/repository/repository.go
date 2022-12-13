@@ -33,8 +33,8 @@ var migrations embed.FS
 
 type Interface interface {
 	Store(value interface{}) error
-	Read(tokenValue string) (Feedback, error)
-	Update(feedbackToUpdate Feedback, tokenValue string) (Feedback, error)
+	FindByToken(tokenValue string) (Feedback, error)
+	Update(feedbackToUpdate Feedback) (Feedback, error)
 }
 
 type Repository struct {
@@ -76,7 +76,7 @@ func (repo *Repository) Store(value interface{}) error {
 	return repo.db.Error
 }
 
-func (repo *Repository) Read(tokenValue string) (Feedback, error) {
+func (repo *Repository) FindByToken(tokenValue string) (Feedback, error) { // rename
 	var feedback = Feedback{}
 	repo.db.Find(&feedback, "Jwt = ?", tokenValue)
 	if feedback.Jwt == "" {
@@ -85,18 +85,21 @@ func (repo *Repository) Read(tokenValue string) (Feedback, error) {
 	return feedback, nil
 }
 
-func (repo *Repository) Update(feedbackToUpdate Feedback, tokenValue string) (Feedback, error) {
+func (repo *Repository) Update(feedbackToUpdate Feedback) (Feedback, error) {
 
-	if repo.checkIfFeedbackExists(tokenValue) == false {
+	if repo.checkIfFeedbackExists(feedbackToUpdate.Jwt) == false {
 		return Feedback{}, errors.New("no record found for update")
 	}
 
-	fromDatabase, _ := repo.Read(tokenValue)
+	fromDatabase, _ := repo.FindByToken(feedbackToUpdate.Jwt)
 
-	repo.db.Model(fromDatabase).Update("rating", feedbackToUpdate.Rating)
-	repo.db.Model(fromDatabase).Update("rating_comment", feedbackToUpdate.RatingComment)
-	repo.db.Model(fromDatabase).Update("metadata", feedbackToUpdate.Metadata)
-	return repo.Read(tokenValue)
+	repo.db.Model(&fromDatabase).Updates(&Feedback{
+		Rating:        feedbackToUpdate.Rating,
+		RatingComment: feedbackToUpdate.RatingComment,
+		Metadata:      feedbackToUpdate.Metadata,
+	})
+
+	return repo.FindByToken(feedbackToUpdate.Jwt)
 }
 
 func (repo *Repository) checkIfFeedbackExists(tokenValue string) bool {
