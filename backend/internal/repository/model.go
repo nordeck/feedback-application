@@ -32,5 +32,5 @@ type Feedback struct {
 	Rating        int
 	RatingComment string
 	Metadata      gormjsonb.JSONB
-	Jwt           string
+	Jwt           string `gorm:"index:jwt_idx,unique"`
 }
