@@ -28,7 +28,7 @@
 
         // called from lib-jitsi-meet
         sendEvent(event) {
-            // console.log(`FEEDBACK handler`, event);
+            // console.log(`${LOG} handler`, event);
 
             if (event.action === 'connection.stage.reached' && event.actionSubject === 'conference_muc.joined') {
                 this.handleJoin();
@@ -68,7 +68,7 @@
                 });
     
                 if (!res.ok) {
-                    throw `${plugin}  Status error: ${res.status}`;
+                    throw `${LOG}  Status error: ${res.status}`;
                 }
     
                 return res.text();
@@ -89,7 +89,14 @@
                 .catch(e => console.error(`${LOG} failed to feedback`, e));
         }
 
+        enableFeedbackOnLeave() {
+            const conf = window.APP.store.getState()['features/base/conference'].conference;
+            conf.isCallstatsEnabled = () => true;
+        }
+
         handleJoin() {
+            this.enableFeedbackOnLeave();
+
             // Extract matrix openId token from the Jitsi JWT token
             const token = window.APP.store.getState()['features/base/jwt'].jwt;
             const payload = token.split('.')[1];
@@ -112,7 +119,7 @@
                 });
     
                 if (!res.ok) {
-                    throw `${plugin}  Status error: ${res.status}`;
+                    throw `${LOG}  Status error: ${res.status}`;
                 }
     
                 return res.text();
