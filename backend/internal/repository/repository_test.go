@@ -19,6 +19,7 @@ package repository
 
 import (
 	"context"
+	"errors"
 	"feedback/internal"
 	gormjsonb "github.com/dariubs/gorm-jsonb"
 	"github.com/stretchr/testify/assert"
@@ -52,7 +53,10 @@ func TestMain(m *testing.M) {
 		panic(err)
 	}
 
-	os.Setenv("DB_PORT", port.Port())
+	err = os.Setenv("DB_PORT", port.Port())
+	if err != nil {
+		panic(err)
+	}
 
 	code := m.Run()
 
@@ -64,7 +68,90 @@ func TestMain(m *testing.M) {
 	os.Exit(code)
 }
 
-func TestRepository_Store(t *testing.T) {
+func TestRepository_CRU_Roundtrip(t *testing.T) {
+	conf := internal.ConfigurationFromEnv()
+	repo := New(conf)
+	repo.Migrate()
+
+	comment := "total doof"
+	rating := 3
+
+	tokenValue := "someJwt"
+	anotherTokenValue := "anotherJwt"
+
+	feedback := Feedback{
+		Rating:        rating,
+		RatingComment: comment,
+		Metadata:      gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"},
+		Jwt:           tokenValue,
+	}
+
+	feedback2 := Feedback{
+		Rating:        rating,
+		RatingComment: comment,
+		Metadata:      gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"},
+		Jwt:           anotherTokenValue,
+	}
+	// CREATE
+	err := repo.Store(&feedback)
+	err2 := repo.Store(&feedback2)
+
+	if err != nil || err2 != nil {
+		panic(err)
+	}
+
+	count := repo.Count()
+	assert.Equal(t, count, int64(2))
+
+	// READ
+	readBeforeUpdate, err := repo.FindByToken(tokenValue)
+	assert.Equal(t, readBeforeUpdate.Rating, rating)
+	assert.Equal(t, readBeforeUpdate.RatingComment, comment)
+	assert.Equal(t, readBeforeUpdate.Metadata, gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"})
+	assert.Equal(t, readBeforeUpdate.Jwt, tokenValue)
+
+	feedbackToUpdate := Feedback{
+		Rating:        -1,
+		RatingComment: comment,
+		Metadata:      gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"},
+		Jwt:           tokenValue,
+	}
+
+	// UPDATE
+	_, err = repo.Update(feedbackToUpdate)
+	if err != nil {
+		panic(err)
+	}
+
+	// READ
+	readAfterUpdate, err := repo.FindByToken(tokenValue)
+	assert.Equal(t, readAfterUpdate.Rating, -1)
+	assert.Equal(t, readAfterUpdate.RatingComment, comment)
+	assert.NotNil(t, readAfterUpdate.CreatedAt)
+	assert.Equal(t, readAfterUpdate.Metadata, gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"})
+	assert.Equal(t, readAfterUpdate.Jwt, tokenValue)
+
+	countAfter := repo.Count()
+	assert.Equal(t, countAfter, int64(2))
+
+}
+
+func TestRepository_CRU_Roundtrip_Read_TokenValueNotFound(t *testing.T) {
+	conf := internal.ConfigurationFromEnv()
+	repo := New(conf)
+	repo.Migrate()
+
+	// READ
+	_, err := repo.FindByToken("tokenValNotAvailable")
+
+	if err == nil {
+		// no error occurred, this should not happen.
+		panic(err)
+	}
+	assert.Equal(t, err, errors.New("no record with token value found in database"))
+}
+
+func TestRepository_CRU_Roundtrip_Update_TokenValueNotFound(t *testing.T) {
 	conf := internal.ConfigurationFromEnv()
 	repo := New(conf)
 	repo.Migrate()
@@ -76,22 +163,19 @@ func TestRepository_Store(t *testing.T) {
 		"second_key": "second_value",
 	}
 
-	feedback := Feedback{
+	feedbackToUpdate := Feedback{
 		Rating:        rating,
 		RatingComment: comment,
 		Metadata:      metadata,
+		Jwt:           "tokenValNotAvailable",
 	}
-	err := repo.Store(&feedback)
-	if err != nil {
+
+	// READ
+	_, err := repo.Update(feedbackToUpdate)
+
+	if err == nil {
+		// no error occurred, this should not happen.
 		panic(err)
 	}
-
-	dbFeedback := Feedback{}
-	repo.db.Find(&dbFeedback)
-
-	assert.Equal(t, dbFeedback.ID, uint(1))
-	assert.Equal(t, dbFeedback.Rating, rating)
-	assert.Equal(t, dbFeedback.RatingComment, comment)
-	assert.NotNil(t, dbFeedback.CreatedAt)
-	assert.Equal(t, dbFeedback.Metadata, gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"})
+	assert.Equal(t, err, errors.New("no record found for update"))
 }

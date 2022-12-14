@@ -21,6 +21,7 @@ type Feedback struct {
 	Rating        int                    `json:"rating"`
 	RatingComment string                 `json:"rating_comment"`
 	Metadata      map[string]interface{} `json:"metadata"`
+	Jwt           string                 `json:"jwt"`
 }
 
 type ValidationResponse struct {

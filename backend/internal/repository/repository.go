@@ -19,19 +19,22 @@ package repository
 
 import (
 	"embed"
+	"errors"
 	"feedback/internal"
 	"feedback/internal/logger"
 	_ "github.com/lib/pq"
 	"github.com/pressly/goose/v3"
 	"gorm.io/gorm"
+	"log"
 )
 
 //go:embed migrations/*.sql
 var migrations embed.FS
-var log = logger.Instance()
 
 type Interface interface {
 	Store(value interface{}) error
+	FindByToken(tokenValue string) (Feedback, error)
+	Update(feedbackToUpdate Feedback) (Feedback, error)
 }
 
 type Repository struct {
@@ -71,4 +74,45 @@ func (repo *Repository) Store(value interface{}) error {
 	tx.Commit()
 
 	return repo.db.Error
+}
+
+func (repo *Repository) FindByToken(tokenValue string) (Feedback, error) { // rename
+	var feedback = Feedback{}
+	repo.db.Find(&feedback, "Jwt = ?", tokenValue)
+	if feedback.Jwt == "" {
+		return feedback, errors.New("no record with token value found in database")
+	}
+	return feedback, nil
+}
+
+func (repo *Repository) Update(feedbackToUpdate Feedback) (Feedback, error) {
+
+	if repo.checkIfFeedbackExists(feedbackToUpdate.Jwt) == false {
+		return Feedback{}, errors.New("no record found for update")
+	}
+
+	fromDatabase, _ := repo.FindByToken(feedbackToUpdate.Jwt)
+
+	repo.db.Model(&fromDatabase).Updates(&Feedback{
+		Rating:        feedbackToUpdate.Rating,
+		RatingComment: feedbackToUpdate.RatingComment,
+		Metadata:      feedbackToUpdate.Metadata,
+	})
+
+	return repo.FindByToken(feedbackToUpdate.Jwt)
+}
+
+func (repo *Repository) checkIfFeedbackExists(tokenValue string) bool {
+	var feedback = &Feedback{}
+	repo.db.Find(&feedback, "Jwt = ?", tokenValue)
+	if feedback.ID == 0 {
+		return false
+	}
+	return true
+}
+
+func (repo *Repository) Count() int64 {
+	var count int64
+	repo.db.Table("feedbacks").Count(&count)
+	return count
 }

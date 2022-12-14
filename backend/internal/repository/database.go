@@ -26,7 +26,7 @@ import (
 )
 
 const (
-	DATABASE_DRIVER = "postgres"
+	DatabaseDriver = "postgres"
 )
 
 func createGormDBConnection(config *internal.Configuration) (*gorm.DB, error) {
@@ -39,5 +39,5 @@ func createGormDBConnection(config *internal.Configuration) (*gorm.DB, error) {
 func createPlainSqlConnection(config *internal.Configuration) (*sql.DB, error) {
 	connectString := fmt.Sprintf("postgres://%s:%s@%s:%s/%s?sslmode=%s",
 		config.DbUser, config.DbPassword, config.DbHost, config.DbPort, config.DbName, config.Sslmode)
-	return sql.Open(DATABASE_DRIVER, connectString)
+	return sql.Open(DatabaseDriver, connectString)
 }

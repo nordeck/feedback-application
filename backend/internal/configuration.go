@@ -24,16 +24,16 @@ import (
 )
 
 type Configuration struct {
-	DbHost            string // DB_HOST
-	DbPort            string // DB_PORT
-	DbUser            string // DB_USER
-	DbPassword        string // DB_PASSWORD
-	DbName            string // DB_NAME
-	Sslmode           string "disable" // SSL_MODE
-	OidcValidationUrl string // OIDC_VALIDATION_URL
-	JwtSecret         string // JWT_SECRET
-	MatrixServerName  string // MATRIX_SERVER_NAME
-	UvsAuthToken      string // UVS_AUTH_TOKEN
+	DbHost            string `json:"db_host,localhost"`                                  // DB_HOST
+	DbPort            string `json:"db_port,5432"`                                       // DB_PORT
+	DbUser            string `json:"db_user,postgres"`                                   // DB_USER
+	DbPassword        string `json:"db_password,postgres"`                               // DB_PASSWORD
+	DbName            string `json:"db_name,postgres"`                                   // DB_NAME
+	Sslmode           string `json:"sslmode,disable"`                                    // SSL_MODE
+	OidcValidationUrl string `json:"oidc_validation_url,'https://some.url/verify/user'"` // OIDC_VALIDATION_URL
+	JwtSecret         string `json:"jwt_secret,someArbitraryString"`                     // JWT_SECRET
+	MatrixServerName  string `json:"matrix_server_name,'domain.tld'"`                    // MATRIX_SERVER_NAME
+	UvsAuthToken      string `json:"uvs_auth_token,someArbitraryString"`                 // UVS_AUTH_TOKEN
 }
 
 func ConfigurationFromEnv() *Configuration {

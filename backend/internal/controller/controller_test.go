@@ -33,10 +33,28 @@ import (
 	"strings"
 	"testing"
 	"testing/iotest"
+	"time"
 )
 
 type RepositoryMock struct {
 	mock.Mock
+}
+
+func (m *RepositoryMock) FindByToken(tokenValue string) (repository.Feedback, error) {
+	feedback := repository.Feedback{
+		BaseModel:     repository.BaseModel{ID: uint(0), CreatedAt: time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC)},
+		Rating:        3,
+		RatingComment: "any_comment",
+		Metadata:      gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"},
+		Jwt:           "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.Z-0V0WjFAQpqLLynDdrYLZIDxzPs-nCVHNxFutGeZIs",
+	}
+	args := m.Called(feedback)
+	return repository.Feedback{}, args.Error(0)
+}
+
+func (m *RepositoryMock) Update(feedbackToUpdate repository.Feedback) (repository.Feedback, error) {
+	args := m.Called(feedbackToUpdate)
+	return repository.Feedback{}, args.Error(0)
 }
 
 func (m *RepositoryMock) Store(value interface{}) error {
@@ -137,8 +155,18 @@ func TestController_CreateFeedback_Authorized(t *testing.T) {
 		Rating:        rating,
 		RatingComment: ratingComment,
 		Metadata:      gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"},
+		Jwt:           "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.Z-0V0WjFAQpqLLynDdrYLZIDxzPs-nCVHNxFutGeZIs",
+	}
+
+	feedback := repository.Feedback{
+		BaseModel:     repository.BaseModel{ID: uint(0), CreatedAt: time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC)},
+		Rating:        3,
+		RatingComment: "any_comment",
+		Metadata:      gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"},
+		Jwt:           "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.Z-0V0WjFAQpqLLynDdrYLZIDxzPs-nCVHNxFutGeZIs",
 	}
 	repoMock.On("Store", expected).Return(nil)
+	repoMock.On("FindByToken", feedback).Return(nil)
 	controller := New(repoMock, nil)
 
 	metadata := map[string]interface{}{
@@ -150,6 +178,7 @@ func TestController_CreateFeedback_Authorized(t *testing.T) {
 		Rating:        rating,
 		RatingComment: ratingComment,
 		Metadata:      metadata,
+		Jwt:           "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.Z-0V0WjFAQpqLLynDdrYLZIDxzPs-nCVHNxFutGeZIs",
 	})
 	request := httptest.NewRequest(http.MethodPost, "/feedback", bytes.NewReader(requestBody))
 	mySigningKey := []byte("someArbitraryString")
@@ -166,7 +195,7 @@ func TestController_CreateFeedback_Authorized(t *testing.T) {
 	assert.Equal(t, "*", responseWriter.Result().Header.Get("Access-Control-Allow-Headers"))
 }
 
-func TestController_CreateFeedback_Authorized_TrailingAndLeadingQuotes(t *testing.T) {
+func TestController_UpdateFeedback_Authorized(t *testing.T) {
 
 	ratingComment := "any_comment"
 	rating := 3
@@ -177,8 +206,19 @@ func TestController_CreateFeedback_Authorized_TrailingAndLeadingQuotes(t *testin
 		Rating:        rating,
 		RatingComment: ratingComment,
 		Metadata:      gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"},
+		Jwt:           "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.Z-0V0WjFAQpqLLynDdrYLZIDxzPs-nCVHNxFutGeZIs",
 	}
+
+	feedback := repository.Feedback{
+		BaseModel:     repository.BaseModel{ID: uint(0), CreatedAt: time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC)},
+		Rating:        3,
+		RatingComment: "any_comment",
+		Metadata:      gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"},
+		Jwt:           "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.Z-0V0WjFAQpqLLynDdrYLZIDxzPs-nCVHNxFutGeZIs",
+	}
+
 	repoMock.On("Store", expected).Return(nil)
+	repoMock.On("FindByToken", feedback).Return(nil)
 	controller := New(repoMock, nil)
 
 	metadata := map[string]interface{}{
@@ -190,18 +230,21 @@ func TestController_CreateFeedback_Authorized_TrailingAndLeadingQuotes(t *testin
 		Rating:        rating,
 		RatingComment: ratingComment,
 		Metadata:      metadata,
+		Jwt:           "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.Z-0V0WjFAQpqLLynDdrYLZIDxzPs-nCVHNxFutGeZIs",
 	})
 	request := httptest.NewRequest(http.MethodPost, "/feedback", bytes.NewReader(requestBody))
 	mySigningKey := []byte("someArbitraryString")
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &jwt.StandardClaims{})
 	signedTokenString, _ := token.SignedString(mySigningKey)
-	request.Header.Set("authorization", "Bearer \""+signedTokenString+"\"")
+	request.Header.Set("authorization", "Bearer "+signedTokenString)
 	responseWriter := httptest.NewRecorder()
 
 	controller.GetRouter().ServeHTTP(responseWriter, request)
 
 	assert.Equal(t, 200, responseWriter.Result().StatusCode)
 	repoMock.AssertExpectations(t)
+	assert.Equal(t, "*", responseWriter.Result().Header.Get("Access-Control-Allow-Origin"))
+	assert.Equal(t, "*", responseWriter.Result().Header.Get("Access-Control-Allow-Headers"))
 }
 
 func TestController_CreateFeedback_Unauthorized_WrongSigningKey(t *testing.T) {
@@ -328,6 +371,15 @@ func TestController_CreateFeedback_invalidJson(t *testing.T) {
 
 func TestController_CreateFeedback_databaseError(t *testing.T) {
 	repoMock := new(RepositoryMock)
+
+	feedback := repository.Feedback{
+		BaseModel:     repository.BaseModel{ID: uint(0), CreatedAt: time.Date(1, time.January, 1, 0, 0, 0, 0, time.UTC)},
+		Rating:        3,
+		RatingComment: "any_comment",
+		Metadata:      gormjsonb.JSONB{"first_key": "first_value", "second_key": "second_value"},
+		Jwt:           "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.e30.Z-0V0WjFAQpqLLynDdrYLZIDxzPs-nCVHNxFutGeZIs",
+	}
+	repoMock.On("FindByToken", feedback).Return(nil)
 	repoMock.On("Store", mock.Anything).Return(errors.New("error"))
 
 	controller := New(repoMock, nil)
