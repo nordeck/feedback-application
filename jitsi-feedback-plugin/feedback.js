@@ -74,11 +74,23 @@
                 return res.text();
             };
 
+            // METRICS    
+            const getMetricsSafe = () => {
+                try {
+                    const metrics = this.gatherMetrics();
+                    console.log(`${LOG} metrics:`, metrics);
+                    return metrics;
+                } catch (e) {
+                    console.error(`${LOG}  Metrics error:`, e);
+                }
+                return {};
+            }
+
             const payload = {
                 rating: rating,
                 rating_comment: comment,
                 metadata: {
-                    field1: "field1"
+                    ...getMetricsSafe()
                 }
             }
 
@@ -94,14 +106,20 @@
             conf.isCallstatsEnabled = () => true;
         }
 
-        handleJoin() {
-            this.enableFeedbackOnLeave();
-
-            // Extract matrix openId token from the Jitsi JWT token
+        _getMatrixContext() {
             const token = window.APP.store.getState()['features/base/jwt'].jwt;
             const payload = token.split('.')[1];
             const content = JSON.parse(atob(payload));
-            const oidToken = content.context.matrix.token;
+            return content.context;
+        }
+
+        handleJoin() {
+            this.enableFeedbackOnLeave();
+
+            console.log(`${LOG} jitsimeet`, JitsiMeetJS);
+
+            // Extract matrix openId token from the Jitsi JWT token
+            const oidToken = this._getMatrixContext().matrix.token;
 
             console.log(`${LOG} Extracted matrix token: ${oidToken}`);
 
@@ -132,7 +150,55 @@
                     window.APP.conference.feedbackToken = feedbackToken;
                 })
                 .catch(e => console.error(`${LOG} failed to fetch JWT`, e));
+                
             return;
+        }
+
+        gatherMetrics() {
+            const metrics = {};
+
+            const config = APP.store.getState()['features/base/config'];
+            const conference = window.APP.store.getState()['features/base/conference'].conference;
+            const localParticipant = window.APP.store.getState()['features/base/participants'].local;
+
+            // meetingId
+            metrics.meetingUrl = window.location.href;
+            metrics.meetingId  = JitsiMeetJS.analytics.permanentProperties.conference_name;
+
+            // participantID
+            metrics.participantId = conference.myUserId();
+
+            // matrix user Id
+            metrics.matrixUserId = localParticipant.email;
+            metrics.displayName  = localParticipant.name;
+
+            // 
+            metrics.userRegion = JitsiMeetJS.analytics.permanentProperties.userRegion;
+
+            // app data
+            // const {appName,environment,releaseNumber,envType,backendRelease} = JitsiMeetJS.analytics.permanentProperties;
+            metrics.appLibVersion = JitsiMeetJS.version;
+            metrics.appFocusVersion = conference.componentsVersions.versions.focus;
+            metrics.appName = JitsiMeetJS.analytics.permanentProperties.appName;
+            metrics.appMeetingRegion = config.deploymentInfo.region;
+            metrics.appShard = config.deploymentInfo.shard;
+            metrics.appRegion = config.deploymentInfo.region;
+            metrics.appEnvironment = config.deploymentInfo.environment;
+            metrics.appEnvType = config.deploymentInfo.envType;
+
+            // browser, os
+            metrics.userAgent = JitsiMeetJS.analytics.permanentProperties.user_agent;
+            metrics.browserName = JitsiMeetJS.util.browser.getName();
+            metrics.browserVersion = JitsiMeetJS.util.browser.getVersion();
+            metrics.osName = JitsiMeetJS.util.browser._bowser.parseOS().name;
+            metrics.osVersion = JitsiMeetJS.util.browser._bowser.parseOS().version;
+            metrics.osVersionName = JitsiMeetJS.util.browser._bowser.parseOS().versionName;
+
+            // standalone or embedded
+            metrics.externalApi = JitsiMeetJS.analytics.permanentProperties.externalApi;
+            metrics.inIframe    = JitsiMeetJS.analytics.permanentProperties.inIframe;
+
+            return metrics;
         }
     }
 
