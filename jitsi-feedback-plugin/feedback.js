@@ -139,13 +139,14 @@
             const metrics = {};
             const config = APP.store.getState()['features/base/config'];
             const flags = config.metadata || [];
-            
-            try {
-                flags.forEach(flag => this._addMetric(flag, metrics));
-            } catch (e) {
-                console.error(`${LOG} Metrics error:`, e);
-                return {};
-            }
+
+            flags.forEach(flag => {
+                try {
+                    this._addMetric(flag, metrics)
+                } catch (e) {
+                    console.error(`${LOG} Metrics error ${flag}:`, e);
+                }
+            });
             
             return metrics;
         }
