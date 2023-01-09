@@ -74,17 +74,19 @@
                 return res.text();
             };
 
+            const metrics = this._gatherMetrics();
+
             const payload = {
                 rating: rating,
                 rating_comment: comment,
                 metadata: {
-                    field1: "field1"
+                    ...metrics
                 }
             }
 
             postFeedback(jwt, payload)
                 .then(result => {
-                    console.log(`${LOG} feedback result: `, result);
+                    console.log(`${LOG} feedback result: `, payload);
                 })
                 .catch(e => console.error(`${LOG} failed to feedback`, e));
         }
@@ -98,10 +100,7 @@
             this.enableFeedbackOnLeave();
 
             // Extract matrix openId token from the Jitsi JWT token
-            const token = window.APP.store.getState()['features/base/jwt'].jwt;
-            const payload = token.split('.')[1];
-            const content = JSON.parse(atob(payload));
-            const oidToken = content.context.matrix.token;
+            const oidToken = this._getMatrixContext().matrix.token;
 
             console.log(`${LOG} Extracted matrix token: ${oidToken}`);
 
@@ -132,8 +131,122 @@
                     window.APP.conference.feedbackToken = feedbackToken;
                 })
                 .catch(e => console.error(`${LOG} failed to fetch JWT`, e));
+                
             return;
         }
+
+        _gatherMetrics() {
+            const metrics = {};
+            const config = APP.store.getState()['features/base/config'];
+            const flags = config.metadata || [];
+
+            flags.forEach(flag => {
+                try {
+                    this._addMetric(flag, metrics)
+                } catch (e) {
+                    console.error(`${LOG} Metrics error ${flag}:`, e);
+                }
+            });
+            
+            return metrics;
+        }
+
+        _getMatrixContext() {
+            const token = window.APP.store.getState()['features/base/jwt'].jwt;
+            const payload = token.split('.')[1];
+            const content = JSON.parse(atob(payload));
+            return content.context;
+        }
+
+        _addMetric(flag, metrics)  {
+            const config = APP.store.getState()['features/base/config'];
+            const conference = window.APP.store.getState()['features/base/conference'].conference;
+            const localParticipant = window.APP.store.getState()['features/base/participants'].local;
+
+            switch (flag) {
+                // meetingId
+                case 'MEETING_URL':
+                    metrics.meetingUrl = window.location.href;
+                    break;
+                case 'MEETING_ID':
+                    metrics.meetingId  = JitsiMeetJS.analytics.permanentProperties.conference_name;
+                    break;
+
+                // participantID    
+                case 'PARTICIPANT_ID':
+                    metrics.participantId = conference.myUserId();
+                    break;
+
+                // matrix user Id    
+                case 'MATRIX_USER_ID':
+                    metrics.matrixUserId = localParticipant.email;
+                    break;
+                case 'DISPLAY_NAME':
+                    metrics.displayName  = localParticipant.name;
+                    break;
+
+                case 'USER_REGION':
+                    metrics.userRegion = JitsiMeetJS.analytics.permanentProperties.userRegion;
+                    break;
+                
+                // app data
+                case 'APP_LIB_VERSION':
+                    metrics.appLibVersion = JitsiMeetJS.version;
+                    break;   
+                case 'APP_FOCUS_VERSION':
+                    metrics.appFocusVersion = conference.componentsVersions.versions.focus;
+                    break; 
+                case 'APP_NAME':
+                    metrics.appName = JitsiMeetJS.analytics.permanentProperties.appName;
+                    break;
+                case 'APP_MEETING_REGION':
+                    metrics.appMeetingRegion = config.deploymentInfo.region;
+                    break;
+                case 'APP_SHARD':
+                    metrics.appShard = config.deploymentInfo.shard;
+                    break;
+                case 'APP_REGION':
+                    metrics.appRegion = config.deploymentInfo.region;
+                    break;
+                case 'APP_ENVIRONMENT':
+                    metrics.appEnvironment = config.deploymentInfo.environment;
+                    break; 
+                case 'APP_ENV_TYPE':
+                    metrics.appEnvType = config.deploymentInfo.envType;
+                    break;
+                case 'APP_BACKEND_RELEASE':
+                    metrics.appBackendRelease = config.deploymentInfo.backendRelease;
+                    break;
+
+                // browser, os
+                case 'USER_AGENT':
+                    metrics.userAgent = JitsiMeetJS.analytics.permanentProperties.user_agent;
+                    break;
+                case 'BROWSER_NAME':
+                    metrics.browserName = JitsiMeetJS.util.browser.getName();
+                    break;
+                case 'BROWSER_VERSION':
+                    metrics.browserVersion = JitsiMeetJS.util.browser.getVersion();
+                    break;
+                case 'OS_NAME':
+                    metrics.osName = JitsiMeetJS.util.browser._bowser.parseOS().name;
+                    break;
+                case 'OS_VERSION':
+                    metrics.osVersion = JitsiMeetJS.util.browser._bowser.parseOS().version;
+                    break;
+                case 'OS_VERSION_NAME':
+                    metrics.osVersionName = JitsiMeetJS.util.browser._bowser.parseOS().versionName;
+                    break;
+                
+                // standalone or embedded
+                case 'EXTERNAL_API':
+                    metrics.externalApi = JitsiMeetJS.analytics.permanentProperties.externalApi;
+                    break;
+                case 'IN_IFRAME':
+                    metrics.inIframe = JitsiMeetJS.analytics.permanentProperties.inIframe;
+                    break;
+            }
+        } 
     }
 
     const getJitsiMeetGlobalNS = () => {
