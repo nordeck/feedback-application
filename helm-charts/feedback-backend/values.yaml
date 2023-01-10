@@ -8,20 +8,11 @@ image:
   repository: ghcr.io/nordeck/feedback-backend
   pullPolicy: Always
   # Overrides the image tag whose default is the chart appVersion.
-  tag: pr-10
+  tag: 1.0.0
 
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
-
-serviceAccount:
-  # Specifies whether a service account should be created
-  create: false
-  # Annotations to add to the service account
-  annotations: {}
-  # The name of the service account to use.
-  # If not set and create is true, a name is generated using the fullname template
-  name: ""
 
 podAnnotations: {}
 
@@ -48,13 +39,6 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 1
-  targetCPUUtilizationPercentage: 80
-  # targetMemoryUtilizationPercentage: 80
-
 nodeSelector: {}
 
 tolerations: []
@@ -68,12 +52,12 @@ ingress:
     kubernetes.io/ingress.class: nginx
     # kubernetes.io/tls-acme: "true"
   hosts:
-    - host: feedback-backend # domain where the feedback backend should be reachable
+    - host: feedback-backend.fqdn # domain where the feedback backend should be reachable
       paths:
         - path: /
           pathType: ImplementationSpecific
   tls: []
-  grafanaHost: grafana.feedback-backend
+  #grafanaHost: grafana.feedback-backend
 
 # passed to the feedback-application backend
 service:
@@ -81,21 +65,21 @@ service:
   # feedback backend's REST API port
   port: 8080
   # URL to the /verify/user endpoint of the Matrix User Verification Service
-  oidcValidationUrl: '' # Example: https://some.url/verify/user
+  oidcValidationUrl: 'matrix.example' # Example: https://some.url/verify/user
   # name of the matrix homeserver as it appears in the second part of Matrix User IDs
   # note the UVS may be configured to accept only a single server name,
   # in which case the setting of UVS and feedback backend must match
-  matrixServerName: '' # Example: domain.tld
-
+  matrixServerName: 'synapse.example' # Example: domain.tld
+  UvsAuthToken: ''
 # global variables needed by the feedback backend service and dependency service
 global:
   postgresql:
     auth:
       username: feedback-user
-      password: ""
+      password: test
       database: feedback
-    # containerPorts:
-    #   postgresql: "5432"
+      containerPorts:
+        postgresql: "5432"
     tls:
       enabled: false
 

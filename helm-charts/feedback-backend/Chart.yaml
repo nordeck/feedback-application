@@ -1,5 +1,5 @@
 apiVersion: v2
-name: feedback-backend
+name: jitsi-feedback-backend
 description: Backend for the Jitsi Meet feedback plugin
 type: application
 version: 0.1.0

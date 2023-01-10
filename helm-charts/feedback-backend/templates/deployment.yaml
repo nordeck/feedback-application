@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "feedback-backend.fullname" . }}
+  name: {{ include "jitsi-feedback-backend.fullname" . }}
   labels:
-    {{- include "feedback-backend.labels" . | nindent 4 }}
+    {{- include "jitsi-feedback-backend.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "feedback-backend.selectorLabels" . | nindent 6 }}
+      {{- include "jitsi-feedback-backend.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -18,13 +18,12 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "feedback-backend.selectorLabels" . | nindent 8 }}
+        {{- include "jitsi-feedback-backend.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "feedback-backend.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -35,7 +34,10 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
             - name: DB_HOST
-              value: {{ .Chart.Name }}-postgresql
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: DbHost
             - name: DB_PORT
               valueFrom:
                 configMapKeyRef:
@@ -56,6 +58,11 @@ spec:
                 configMapKeyRef:
                   name: backend-config
                   key: dbName
+            - name: UVS_AUTH_TOKEN
+              valueFrom:
+                configMapKeyRef:
+                  name: backend-config
+                  key: UVS_AUTH_TOKEN
             - name: SSL_MODE
               valueFrom:
                 configMapKeyRef:
@@ -66,11 +73,11 @@ spec:
                 configMapKeyRef:
                   name: backend-config
                   key: oidcValidationUrl
-            - name: JWT_SIGNATURE
+            - name: JWT_SECRET
               valueFrom:
                 secretKeyRef:
                   name: backend-secrets
-                  key: jwtSecret
+                  key: JWT_SECRET
             - name: MATRIX_SERVER_NAME
               valueFrom:
                 configMapKeyRef:
