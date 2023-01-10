@@ -1,0 +1,148 @@
+# Default values for feedback-backend.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: ghcr.io/nordeck/feedback-backend
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: 1.0.0
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext: {}
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # readOnlyRootFilesystem: true
+  # runAsNonRoot: true
+  # runAsUser: 1000
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+ingress:
+  enabled: true
+  className: ""
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: feedback-backend.fqdn # domain where the feedback backend should be reachable
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls: []
+  #grafanaHost: grafana.feedback-backend
+
+# passed to the feedback-application backend
+service:
+  type: ClusterIP
+  # feedback backend's REST API port
+  port: 8080
+  # URL to the /verify/user endpoint of the Matrix User Verification Service
+  oidcValidationUrl: 'matrix.example' # Example: https://some.url/verify/user
+  # name of the matrix homeserver as it appears in the second part of Matrix User IDs
+  # note the UVS may be configured to accept only a single server name,
+  # in which case the setting of UVS and feedback backend must match
+  matrixServerName: 'synapse.example' # Example: domain.tld
+  UvsAuthToken: ''
+# global variables needed by the feedback backend service and dependency service
+global:
+  postgresql:
+    auth:
+      username: feedback-user
+      password: test
+      database: feedback
+      containerPorts:
+        postgresql: "5432"
+    tls:
+      enabled: false
+
+# private to postgres
+postgresql:
+  auth:
+    enablePostgresUser: false
+    # postgresPassword: "" # postgres admin user pw
+  image:
+    tag: '15' # match with Grafana postgresVersion
+
+# passed to grafana
+grafana:
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+          # <string, required> name of the datasource. Required
+        - name: Feedback-psql
+          # <string, required> datasource type. Required
+          type: postgres
+          # <string, required> access mode. proxy or direct (Server or Browser in the UI). Required
+          access: proxy
+          # <int> org id. will default to orgId 1 if not specified
+          orgId: 1
+          # <string> url. made up of this Chart's name and the name of the database dependency
+          url: "{{- $containerPorts := .Values.global.postgresql.containerPorts | default dict -}}
+                feedback-backend-postgresql:{{ $containerPorts.postgresql | default 5432 }}"
+          # <string> database user, if used
+          user: "{{ .Values.global.postgresql.auth.username }}"
+          # <string> database name, if used
+          database: "{{ .Values.global.postgresql.auth.database }}"
+          maxOpen: unlimited
+          maxIdle: 2
+          maxLifetime: 14400
+          # version: 1
+          timescaleDB: false
+          # <bool> allow users to edit datasources from the UI.
+          editable: false
+          jsonData:
+            sslmode: "{{ if .Values.global.postgresql.tls.enabled }}require{{ else }}disable{{ end -}}"
+            tlsConfigurationMethod: 'file-content'
+            sslRootCertFile: ''
+            sslCertFile: ''
+            sslKeyFile: ''
+            # Postgres version as a number (903/904/905/906/1000) meaning v9.3, v9.4, …, v10
+            postgresVersion: '15' # based on postgres tag
+          secureJsonData:
+            password: '{{ required "Setting a database password is required!" .Values.global.postgresql.auth.password }}'
+  dashboardProviders:
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+      - name: 'default'
+        orgId: 1
+        folder: ''
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/default
+  dashboards:
+    default:
+      feedback-dashboard:
+        url: https://raw.githubusercontent.com/nordeck/feedback-application/main/grafana/Feedback%20Dashboard-1669906814000.json
+        datasource: Feedback-psql
