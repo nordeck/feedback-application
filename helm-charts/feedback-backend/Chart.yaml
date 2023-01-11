@@ -1,0 +1,15 @@
+apiVersion: v2
+name: jitsi-feedback-backend
+description: Backend for the Jitsi Meet feedback plugin
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+
+dependencies:
+  - name: postgresql
+    version: 12.1.2 # chart version
+    repository: "https://charts.bitnami.com/bitnami"
+  - name: grafana
+    version: 6.44.8 # chart version
+    repository: "https://grafana.github.io/helm-charts"
+    condition: grafana.enabled

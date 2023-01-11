@@ -31,7 +31,7 @@
     {
       "datasource": {
         "type": "postgres",
-        "uid": "ShXhP2DVz"
+        "uid": "${datasource}"
       },
       "description": "",
       "fieldConfig": {
@@ -88,25 +88,11 @@
         {
           "datasource": {
             "type": "postgres",
-            "uid": "ShXhP2DVz"
+            "uid": "${datasource}"
           },
           "format": "time_series",
-          "group": [
-            {
-              "params": [
-                "$__interval",
-                "none"
-              ],
-              "type": "time"
-            },
-            {
-              "params": [
-                "rating"
-              ],
-              "type": "column"
-            }
-          ],
-          "metricColumn": "rating_comment",
+          "group": [],
+          "metricColumn": "none",
           "rawQuery": true,
           "rawSql": "SELECT\n  CASE \n    WHEN rating = 1 THEN '1'\n    WHEN rating = 2 THEN '2'\n    WHEN rating = 3 THEN '3'\n    WHEN rating = 4 THEN '4'\n    WHEN rating = 5 THEN '5'\n    ELSE 'Unknown'\n  END,\n  count(*) as \"bewertet mit\",\n  $__unixEpochTo() AS time\nFROM\n  feedbacks\nGROUP BY 1",
           "refId": "A",
@@ -114,27 +100,13 @@
             [
               {
                 "params": [
-                  "id"
+                  "value"
                 ],
                 "type": "column"
-              },
-              {
-                "params": [
-                  "avg"
-                ],
-                "type": "aggregate"
-              },
-              {
-                "params": [
-                  "id"
-                ],
-                "type": "alias"
               }
             ]
           ],
-          "table": "feedbacks",
-          "timeColumn": "created_at",
-          "timeColumnType": "timestamp",
+          "timeColumn": "time",
           "where": [
             {
               "name": "$__timeFilter",
@@ -150,7 +122,7 @@
     {
       "datasource": {
         "type": "postgres",
-        "uid": "ShXhP2DVz"
+        "uid": "${datasource}"
       },
       "description": "",
       "fieldConfig": {
@@ -208,23 +180,15 @@
           }
         ]
       },
-      "pluginVersion": "9.2.3",
+      "pluginVersion": "9.2.5",
       "targets": [
         {
           "datasource": {
             "type": "postgres",
-            "uid": "icpj1FvVz"
+            "uid": "${datasource}"
           },
           "format": "table",
-          "group": [
-            {
-              "params": [
-                "24h",
-                "none"
-              ],
-              "type": "time"
-            }
-          ],
+          "group": [],
           "metricColumn": "none",
           "rawQuery": true,
           "rawSql": "SELECT\n rating as \"Sternebewertung\", rating_comment as \"Freitext\"\nFROM feedbacks \nWHERE\n  $__timeFilter(created_at)\nGROUP BY 1,2\nORDER BY 1",
@@ -233,27 +197,13 @@
             [
               {
                 "params": [
-                  "rating"
+                  "value"
                 ],
                 "type": "column"
-              },
-              {
-                "params": [
-                  "count"
-                ],
-                "type": "aggregate"
-              },
-              {
-                "params": [
-                  "number of ratings"
-                ],
-                "type": "alias"
               }
             ]
           ],
-          "table": "feedbacks",
-          "timeColumn": "created_at",
-          "timeColumnType": "timestamp",
+          "timeColumn": "time",
           "where": [
             {
               "name": "$__timeFilter",
@@ -272,16 +222,36 @@
   "style": "dark",
   "tags": [],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "Feedback-psql",
+          "value": "Feedback-psql"
+        },
+        "hide": 0,
+        "includeAll": false,
+        "label": "Data source",
+        "multi": false,
+        "name": "datasource",
+        "options": [],
+        "query": "postgres",
+        "queryValue": "",
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "type": "datasource"
+      }
+    ]
   },
   "time": {
-    "from": "2022-09-30T21:40:50.500Z",
-    "to": "2022-12-05T05:47:46.500Z"
+    "from": "now-7d",
+    "to": "now"
   },
   "timepicker": {},
-  "timezone": "",
+  "timezone": "browser",
   "title": "Feedback Dashboard",
   "uid": "58Ga9FDVk",
-  "version": 5,
-  "weekStart": ""
+  "version": 1,
+  "weekStart": "monday"
 }
