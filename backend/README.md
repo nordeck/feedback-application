@@ -8,7 +8,7 @@ An authorization mechanism is implemented in conjunction with the frontend, whic
 submitted by authorized [Matrix](https://matrix.org) users
 through [Matrix UVS](https://github.com/matrix-org/matrix-user-verification-service/).
 
-## How To Use
+## Installation
 
 This application needs its REST port (default `8080`) exposed to the network where it is reachable from your clients, which typically means it's open to the internet.
 Because sensitive information such as secret tokens are exchanged between clients and the backend, HTTPS (TLS) should be used to avoid leaking those secrets.
