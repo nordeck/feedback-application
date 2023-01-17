@@ -9,7 +9,7 @@ The intended way to configure this is by leveraging the `custom-config.js` metho
 
 ```javascript
 // address of the feedback backend REST API, reachable from the end user device
-config.feedbackBackend = 'http://localhost:8333'
+config.feedbackBackend = 'http://localhost:8080'
 
 // percentage of users to automatically request feedback from when leaving the call
 // it's 100 by default if undefined, i.e. always shown
