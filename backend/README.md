@@ -10,6 +10,11 @@ through [Matrix UVS](https://github.com/matrix-org/matrix-user-verification-serv
 
 ## How To Use
 
+This application needs its REST port (default `8080`) exposed to the network where it is reachable from your clients, which typically means it's open to the internet.
+Because sensitive information such as secret tokens are exchanged between clients and the backend, HTTPS (TLS) should be used to avoid leaking those secrets.
+Terminating TLS is out of scope for this app; we suggest using a reverse proxy or ingress of your choice that fits your deployment environment.
+The appropriate publicly reachable address must be [configured in Jitsi](https://github.com/nordeck/feedback-application/blob/main/jitsi-feedback-plugin/README.md#required-jitsi-configuration) using the setting `config.feedbackBackend`.
+
 To clone and run this application, you'll need [Git](https://git-scm.com) as well as [Docker](https://docker.com/)
 installed and configured on your computer.
 
@@ -19,7 +24,7 @@ installed and configured on your computer.
     1. `cd backend`
     2. `docker build --tag=nordeck/feedback-app .`
     3. `docker run nordeck/feedback-app` with the fitting environment and port publishing parameters for your setup
-4. Run Grafana with the [provided dashboard](../grafana) (optional)
+4. (optional) Run Grafana with the [provided dashboard](../grafana)
 
 ## Configuration
 
