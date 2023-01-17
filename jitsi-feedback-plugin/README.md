@@ -1,5 +1,6 @@
-### How to install the custom analytics feedback handler
+# Jitsi Feedback Plugin
 
+## Installation
 
 We suggest to mount the `feedback.js` to the root of the jitsi-meet application, matching the path set in `config.analytics.scriptURLs`.
 For example, the location inside the jitsi-meet web container is `/usr/share/jitsi-meet/feedback.js`, and it will be reachable from clients at `/feedback.js`.
