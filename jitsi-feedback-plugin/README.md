@@ -1,15 +1,20 @@
-### How to install the custom analytics feedback handler
+# Jitsi Feedback Plugin
 
+## Installation
 
-Mount the `feedback.js` to the root of the jitsi-meet application.
-For example, the location inside the jitsi-meet web container is `/usr/share/jitsi-meet/feedback.js`.
+We suggest to mount the `feedback.js` to the root of the jitsi-meet application, matching the path set in `config.analytics.scriptURLs`.
+For example, the location inside the jitsi-meet web container is `/usr/share/jitsi-meet/feedback.js`, and it will be reachable from clients at `/feedback.js`.
+
+If required by your special use case, it is technically possible to host `feedback.js` anywhere you want as long as clients can reach it. Simply adjust the path given in the `scriptURLs` config setting needs to match.
+
+### Required Jitsi configuration
 
 These are the relevant settings that need to be set in jitsi-meet.
 The intended way to configure this is by leveraging the `custom-config.js` method.
 
 ```javascript
 // address of the feedback backend REST API, reachable from the end user device
-config.feedbackBackend = 'http://localhost:8080'
+config.feedbackBackend = 'https://example.org:8080'
 
 // percentage of users to automatically request feedback from when leaving the call
 // it's 100 by default if undefined, i.e. always shown
