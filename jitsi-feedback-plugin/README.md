@@ -61,4 +61,87 @@ config.metadata = [ ''
     // ,'USER_REGION'
 ];
 
+
+// Optional.
+config.deploymentInfo = {
+         shard: "shard1",
+         region: "europe",
+         userRegion: "asia",
+         envType: "envType",
+         backendRelease: "backendRelease",
+         environment: "production"
+};
+
 ```
+
+## Sample Data
+
+| Metadata            | Value                                 |
+| ------------------- | ------------------------------------- |
+| APP_BACKEND_RELEASE | "backendRelease"                      |
+| APP_ENV_TYPE        | "envType"                             |
+| APP_ENVIRONMENT     | "production"                          |
+| APP_FOCUS_VERSION   | "1.0.954"                             |
+| APP_LIB_VERSION     | "{#COMMIT_HASH#}"                     |
+| APP_MEETING_REGION  | "europe"                              |
+| APP_NAME            | "Jitsi Meet"                          |
+| APP_REGION          | "europe"                              |
+| APP_SHARD           | "shard1"                              |
+| BROWSER_NAME        | "firefox"                             |
+| BROWSER_VERSION     | "109.0"                               |
+| DISPLAY_NAME        | "ElementUser"                         |
+| EXTERNAL_API        | true                                  |
+| IN_IFRAME           | true                                  |
+| MATRIX_USER_ID      | "@ElementUser:localhost"              |
+| MEETING_ID          | "EFKVM...XXG5A"                       |
+| MEETING_URL         | "https://localhost:8443/EFKVM...",    |
+| OS_NAME             | "Windows"                             |
+| OS_VERSION_NAME     | "10"                                  |
+| OS_VERSION          | "NT 10.0"                             |
+| PARTICIPANT_ID      | "61e74952"                            |
+| USER_AGENT          | "Mozilla/5.0 AppleWebKit/537.36 ...." |
+| USER_REGION         | "asia"                                |
+
+## Compatibility
+
+| Metadata            | Firefox | Safari | Chrome | Chromium | Edge |
+| ------------------- | ------- | ------ | ------ | -------- | ---- |
+| APP_BACKEND_RELEASE | :o:     |        | :o:    | :o:      | :o:  |
+| APP_ENV_TYPE        | :o:     |        | :o:    | :o:      | :o:  |
+| APP_ENVIRONMENT     | :o:     |        | :o:    | :o:      | :o:  |
+| APP_FOCUS_VERSION   | :o:     |        | :o:    | :o:      | :o:  |
+| APP_LIB_VERSION     | :o:     |        | :o:    | :o:      | :o:  |
+| APP_MEETING_REGION  | :o:     |        | :o:    | :o:      | :o:  |
+| APP_NAME            | :o:     |        | :o:    | :o:      | :o:  |
+| APP_REGION          | :o:     |        | :o:    | :o:      | :o:  |
+| APP_SHARD           | :o:     |        | :o:    | :o:      | :o:  |
+| BROWSER_NAME        | :o:     |        | :o:    | :o:      | :o:  |
+| BROWSER_VERSION     | :o:     |        | :o:    | :o:      | :o:  |
+| DISPLAY_NAME        | :o:     |        | :o:    | :o:      | :o:  |
+| EXTERNAL_API        | :o:     |        | :o:    | :o:      | :o:  |
+| IN_IFRAME           | :o:     |        | :o:    | :o:      | :o:  |
+| MATRIX_USER_ID      | :o:     |        | :o:    | :o:      | :o:  |
+| MEETING_ID          | :o:     |        | :o:    | :o:      | :o:  |
+| MEETING_URL         | :o:     |        | :o:    | :o:      | :o:  |
+| OS_NAME             | :o:     |        | :o:    | :o:      | :o:  |
+| OS_VERSION_NAME     | :o:     |        | :o:    | :o:      | :o:  |
+| OS_VERSION          | :o:     |        | :o:    | :o:      | :o:  |
+| PARTICIPANT_ID      | :o:     |        | :o:    | :o:      | :o:  |
+| USER_AGENT          | :o:     |        | :o:    | :o:      | :o:  |
+| USER_REGION         | :o:     |        | :o:    | :o:      | :o:  |
+
+* :o: supported
+* :x: problems reported
+
+Tested on 
+Jitsi stable-8044-1
+Firefox 109.0 (windows 11)
+Chrome 108 (Linux)
+
+#### Notes
+
+`APP_FOCUS_VERSION`, `PARTICIPANT_ID`  not available when the feedback is submitted before leaving the call, but are present if the feedback is sent using the "Leave Feedback" button in the toolbar.
+
+`OS_VERSION_NAME` and `OS_VERSION` may be empty on Linux hosts.
+
+`PARTICIPANT_ID` is  the local user's ID in the jitsi room. Lookup `JitsiConference.prototype.myUserId` function  from `lib-jitsi-meet` for reference.```
