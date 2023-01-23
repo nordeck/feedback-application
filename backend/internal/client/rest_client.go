@@ -27,7 +27,6 @@ import (
 func Post(config *internal.Configuration, reqBody []byte) (io.ReadCloser, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("POST", config.OidcValidationUrl, bytes.NewBuffer(reqBody))
-	req.Header.Add("Authorization", "Bearer "+config.UvsAuthToken)
 	req.Header.Add("Content-Type", "application/json")
 	resp, err := client.Do(req)
 	if err != nil {
