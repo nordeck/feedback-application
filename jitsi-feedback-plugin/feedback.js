@@ -172,11 +172,6 @@
                     metrics.meetingId  = JitsiMeetJS.analytics.permanentProperties.conference_name;
                     break;
 
-                // participantID    
-                case 'PARTICIPANT_ID':
-                    metrics.participantId = conference.myUserId();
-                    break;
-
                 // matrix user Id    
                 case 'MATRIX_USER_ID':
                     metrics.matrixUserId = localParticipant.email;

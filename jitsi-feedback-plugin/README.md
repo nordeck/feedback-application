@@ -56,7 +56,6 @@ config.metadata = [ ''
     // ,'OS_NAME'
     // ,'OS_VERSION_NAME'
     // ,'OS_VERSION'
-    // ,'PARTICIPANT_ID'
     // ,'USER_AGENT'
     // ,'USER_REGION'
 ];
@@ -98,7 +97,6 @@ config.deploymentInfo = {
 | OS_NAME             | "Windows"                             |
 | OS_VERSION_NAME     | "10"                                  |
 | OS_VERSION          | "NT 10.0"                             |
-| PARTICIPANT_ID      | "61e74952"                            |
 | USER_AGENT          | "Mozilla/5.0 AppleWebKit/537.36 ...." |
 | USER_REGION         | "asia"                                |
 
@@ -126,7 +124,6 @@ config.deploymentInfo = {
 | OS_NAME             | :o:     |        | :o:    | :o:      | :o:  |
 | OS_VERSION_NAME     | :o:     |        | :o:    | :o:      | :o:  |
 | OS_VERSION          | :o:     |        | :o:    | :o:      | :o:  |
-| PARTICIPANT_ID      | :o:     |        | :o:    | :o:      | :o:  |
 | USER_AGENT          | :o:     |        | :o:    | :o:      | :o:  |
 | USER_REGION         | :o:     |        | :o:    | :o:      | :o:  |
 
