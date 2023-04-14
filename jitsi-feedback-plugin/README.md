@@ -12,6 +12,8 @@ If required by your special use case, it is technically possible to host `feedba
 These are the relevant settings that need to be set in jitsi-meet.
 The intended way to configure this is by leveraging the `custom-config.js` method.
 
+Do not copy plugin.head.html into `/usr/share/jitsi-meet/` if the analytics system is enabled and third party requests are enabled.
+
 ```javascript
 // address of the feedback backend REST API, reachable from the end user device
 config.feedbackBackend = 'https://example.org:8080'
@@ -26,7 +28,7 @@ config.callStatsID = 'id';
 // disables CallStats even if callStatsID is set
 config.callStatsSecret = null;
 
-// this will enable analytics, both need to be false for our handler to work
+// IMPORTANT: this will enable analytics, both need to be false for our handler to work
 config.disableThirdPartyRequests = false;
 config.analytics.disabled = false
 
@@ -72,6 +74,23 @@ config.deploymentInfo = {
 };
 
 ```
+
+### Delpoyment if third party requests are disabled
+
+If `config.disableThirdPartyRequests = true` the analytics system will be disabled.
+Copy plugin.head.html into `/usr/share/jitsi-meet/plugin.head.html`.
+
+The plugin injects itself into Jitsi javascript functions and is more likely to break after upgrading the Jitsi frontend to a new version,
+but it enables collecting the feedback even if it can't be sent using the analytics handlers.
+
+The above configuration has to be changed this way:
+```js
+config.disableThirdPartyRequests = true;
+
+// the handlers won't be loaded, so this may be removed
+// config.analytics.scriptURLs = ['/feedback.js'];
+```
+
 
 ## Sample Data
 
