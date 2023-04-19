@@ -75,7 +75,7 @@ config.deploymentInfo = {
 
 ```
 
-### Delpoyment if third party requests are disabled
+### Deployment if third party requests are disabled
 
 If `config.disableThirdPartyRequests = true` the analytics system will be disabled.
 Copy plugin.head.html into `/usr/share/jitsi-meet/plugin.head.html`.
