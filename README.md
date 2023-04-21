@@ -1,6 +1,6 @@
 <h1 align="center">
   <br>
-  <a href="https://nordeck.net/"><img src="https://nordeck.net/wp-content/uploads/2020/05/NIC_logo_Nordeck-300x101.png" alt="Markdownify" width="300"></a>
+  <a href="https://nordeck.net/"><img src="./.docs/logos/nordeck-logo.png" alt="Nordeck" width="300"></a>
   <br>
   Feedback-Application
   <br>
@@ -54,10 +54,14 @@ This project is licensed under [APACHE 2.0](./LICENSE).
 
 ### Sponsors
 
-<p align="center">
-   <a href="https://www.dataport.de/"><img src="./.docs/logos/dataportlogo.png" alt="Dataport" width="20%"></a>
-   <a href="https://nordeck.net/"><img src="https://nordeck.net/wp-content/uploads/2020/05/NIC_logo_Nordeck-300x101.png" alt="Markdownify" width="300"></a>
-</p>
+<div align="center">
+    <a href="https://www.dataport.de/">
+        <img src="./.docs/logos/dataport-logo.png" alt="Dataport" height="99px">
+    </a>
+    <a href="https://nordeck.net/">
+        <img src="./.docs/logos/nordeck-logo.png" alt="Nordeck" height="99px">
+    </a>
+</div>
 
 > [nordeck.net](https://nordeck.net/) &nbsp;&middot;&nbsp;
-> GitHub [Nordeck](https://github.com/nordeck/) 
+> GitHub [Nordeck](https://github.com/nordeck/)
